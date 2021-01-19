@@ -1,0 +1,33 @@
+name: MyFactions
+version: 1.0
+author: DrBrad
+main: unet.Factions.Main
+description: Im the best their is plain and simple, I mean I wake up and piss excellance
+api-version: 1.16
+commands:
+  f:
+    description: Factions commands
+  warp:
+    description: Warp to a location
+  warps:
+    description: List of warps
+  setwarp:
+    description: Set warp location
+  delwarp:
+    description: Remove warp location
+  home:
+    description: Teleport players home
+  sethome:
+    description: Set players home
+  spawn:
+    description: Teleport player to spawn
+  setspawn:
+    description: Set worlds spawn
+  tpa:
+    description: Teleport to player
+  tpaa:
+    description: Accept player teleport
+  tpad:
+    description: Deny player teleport
+  back:
+    description: Teleport back to previous location
