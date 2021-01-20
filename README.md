@@ -3,6 +3,10 @@ MyFactions
 
 This is a working version of factions plugin for Spigot Minecraft V1.16.4
 
+Donate
+-----------
+https://www.paypal.com/paypalme/TheAnarch
+
 Commands
 -----------
 - /f help      List of all commands
