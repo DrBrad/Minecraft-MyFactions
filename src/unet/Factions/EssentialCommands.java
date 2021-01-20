@@ -1,5 +1,6 @@
 package unet.Factions;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -10,13 +11,12 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.UUID;
 
 import static unet.Factions.Handlers.*;
 import static unet.Factions.Main.*;
 
 public class EssentialCommands  implements CommandExecutor {
-
-    private HashMap<Player, Player> playerTeleport = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args){
@@ -246,23 +246,28 @@ public class EssentialCommands  implements CommandExecutor {
 
     private void tpa(Player player, String[] args){
         if(args.length > 0){
-            Player reqPlayer = plugin.getServer().getPlayer(args[1]);
-
+            Player reqPlayer = plugin.getServer().getPlayer(args[0]);
             if(reqPlayer != null && reqPlayer.isOnline()){
-                playerTeleport.put(reqPlayer, player);
+                if(reqPlayer != player){
+                    playerTeleport.put(reqPlayer, player);
 
-                player.sendMessage("§7Teleport request sent to §c"+reqPlayer.getDisplayName()+"§7.");
-                reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 wishes to teleport, please type §a/tpaa§7 to accept or §c/tpad§7to deny, this will expire in §c30s§7.");
+                    player.sendMessage(player.getDisplayName()+" -> "+reqPlayer.getDisplayName());
 
-                plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
-                    @Override
-                    public void run(){
-                        if(playerTeleport.containsKey(reqPlayer)){
-                            playerTeleport.remove(reqPlayer);
-                            reqPlayer.sendMessage("§7Teleport request has expired!");
+                    player.sendMessage("§7Teleport request sent to §c"+reqPlayer.getDisplayName()+"§7.");
+                    reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 wishes to teleport, please type §a/tpaa§7 to accept or §c/tpad§7to deny, this will expire in §c30s§7.");
+
+                    plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+                        @Override
+                        public void run(){
+                            if(playerTeleport.containsKey(reqPlayer)){
+                                playerTeleport.remove(reqPlayer);
+                                reqPlayer.sendMessage("§7Teleport request has expired!");
+                            }
                         }
-                    }
-                }, 600);
+                    }, 600);
+                }else{
+                    player.sendMessage("§cYou cannot teleport to yourself...");
+                }
             }else{
                 player.sendMessage("§cThe player you are inviting doesn't exist or is not §aonline§c.");
             }
@@ -272,13 +277,18 @@ public class EssentialCommands  implements CommandExecutor {
     }
 
     private void tpaa(Player player){
+        player.sendMessage(player.getDisplayName()+" <- "+playerTeleport.size());
         if(playerTeleport.containsKey(player)){
             Player reqPlayer = playerTeleport.get(player);
-            player.sendMessage("§7You have accepted teleport for: §c"+reqPlayer.getDisplayName()+"§7.");
-            reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 has accepted your teleport request.");
-            teleport(reqPlayer, player.getLocation(), player.getDisplayName());
-            playerTeleport.remove(player);
 
+            if(reqPlayer.isOnline()){
+                player.sendMessage("§7You have accepted teleport for: §c"+reqPlayer.getDisplayName()+"§7.");
+                teleport(reqPlayer, player.getLocation(), player.getDisplayName());
+                playerTeleport.remove(player);
+
+            }else{
+                player.sendMessage("§cPlayer is no longer online.");
+            }
         }else{
             player.sendMessage("§cYou have no tp requests.");
         }

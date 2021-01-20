@@ -2,6 +2,8 @@ package unet.Factions;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,10 +17,12 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.*;
 
 import static unet.Factions.Faction.*;
 import static unet.Factions.Handlers.sendTitle;
+import static unet.Factions.Handlers.teleport;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -31,6 +35,7 @@ public class Main extends JavaPlugin implements Listener {
     public static ArrayList<Player> teleport = new ArrayList<>();
     public static ArrayList<Player> factionChat = new ArrayList<>();
     public static HashMap<Player, Location> lastTeleport = new HashMap<>();
+    public static HashMap<Player, Player> playerTeleport = new HashMap<>();
     public static int teleportDelay = 30;
 
     //SPAWNER ONLY OBTAIN EGG IF SILK
@@ -149,10 +154,23 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event){
+        event.setJoinMessage("§c"+event.getPlayer().getDisplayName()+"§7 Has joined the server!");
     }
 
     @EventHandler
     public void onLeave(PlayerQuitEvent event){
+        event.setQuitMessage("§c"+event.getPlayer().getDisplayName()+"§7 Has left the game!");
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent event){
+        File spawn = new File(plugin.getDataFolder()+File.separator+"spawn.yml");
+        if(spawn.exists()){
+            FileConfiguration config = YamlConfiguration.loadConfiguration(spawn);
+
+            event.setRespawnLocation(new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
+                    config.getDouble("y"), config.getDouble("z")));
+        }
     }
 
     @EventHandler
@@ -175,18 +193,17 @@ public class Main extends JavaPlugin implements Listener {
                     Player player = Bukkit.getPlayer(UUID.fromString(playerUUID));
 
                     if(player != null && player.isOnline()){
-                        player.sendMessage("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§a: "+event.getMessage());
+                        player.sendMessage("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: §a"+event.getMessage());
                     }
                 }
 
-                event.getPlayer().sendMessage("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§a: "+event.getMessage());
                 event.setCancelled(true);
 
             }else{
-                event.setMessage("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
+                event.setFormat("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
             }
         }else{
-            event.setMessage("[§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
+            event.setFormat("§6[§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
         }
     }
 
