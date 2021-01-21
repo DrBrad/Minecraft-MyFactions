@@ -368,6 +368,22 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onHunger(FoodLevelChangeEvent event){
+        if(event.getEntity() instanceof Player){
+            Player player = (Player) event.getEntity();
+
+            if(event.getFoodLevel() < ((Player) event.getEntity()).getFoodLevel()){
+                String claim = inClaim(player.getLocation().getChunk());
+                if(claim != null){
+                    if(claim.equals("Safe-Zone") && !safeZonePvp){
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onPlayerDamage(EntityDamageEvent event){
         if(event.getEntity() instanceof Player){
             Player player = (Player) event.getEntity();
