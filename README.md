@@ -21,6 +21,8 @@ Commands
 - **/f disband**   Delete faction
 - **/f claim**     Claim land for faction
 - **/f unclaim**   Unclaim land for faction
+- **/f autoclaim**     Automatically claim land for faction
+- **/f autounclaim**   Automatically unclaim land for faction
 - **/f home**      Go to faction home
 - **/f sethome**   Set faction home
 - **/f warp**      Warp to faction warp
@@ -36,6 +38,10 @@ Commands
 - **/f unclaim safezone**   Unclaim land for safe zone
 - **/f claim pvpzone**     Claim land for pvp zone
 - **/f unclaim pvpzone**   Unclaim land for pvp zone
+- **/f autoclaim safezone**     Automatically claim land for safe zone
+- **/f autounclaim safezone**   Automatically unclaim land for safe zone
+- **/f autoclaim pvpzone**     Automatically claim land for pvp zone
+- **/f autounclaim pvpzone**   Automatically unclaim land for pvp zone
 - **/f chown**     Change faction ownership
 - **/f setpower**  Set faction power
 - **/f rank**      Get your rank in faction
