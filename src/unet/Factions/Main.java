@@ -356,6 +356,21 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPlayerDamage(EntityDamageEvent event){
+        if(event.getEntity() instanceof Player){
+            Player player = (Player) event.getEntity();
+
+            String claim = inClaim(player.getLocation().getChunk());
+            if(claim != null){
+                if(claim.equals("Safe-Zone") && !safeZonePvp){
+                    event.setDamage(0.0f);
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event){
         String claim = inClaim(event.getLocation().getChunk());
         if(claim != null && (claim.equals("Safe-Zone") || claim.equals("Pvp-Zone"))){
