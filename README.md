@@ -24,6 +24,7 @@ Commands
 - **/f home**      Go to faction home
 - **/f sethome**   Set faction home
 - **/f warp**      Warp to faction warp
+- **/f warps**     List of factions warps
 - **/f setwarp**   Set faction warp
 - **/f delwarp**   Remove faction warp
 - **/f power**     Get factions power
