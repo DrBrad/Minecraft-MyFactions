@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import java.lang.reflect.Constructor;
 
+import static unet.Factions.Config.*;
 import static unet.Factions.Main.*;
 
 public class Handlers {

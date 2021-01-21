@@ -29,5 +29,7 @@ commands:
     description: Accept player teleport
   tpad:
     description: Deny player teleport
+  wild:
+    description: Teleport randomly in the wild
   back:
     description: Teleport back to previous location

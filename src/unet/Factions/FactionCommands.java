@@ -1,10 +1,6 @@
 package unet.Factions;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -18,11 +14,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 
-import static unet.Factions.Handlers.teleport;
+import static unet.Factions.Config.*;
+import static unet.Factions.Handlers.*;
 import static unet.Factions.Main.*;
 import static unet.Factions.Faction.*;
 
 public class FactionCommands implements CommandExecutor {
+
+    private HashMap<Player, String> invites = new HashMap<>();
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args){
@@ -71,11 +70,11 @@ public class FactionCommands implements CommandExecutor {
                         break;
 
                     case "claim":
-                        claim(((Player) commandSender));
+                        claim(((Player) commandSender), args);
                         break;
 
                     case "unclaim":
-                        unclaim(((Player) commandSender));
+                        unclaim(((Player) commandSender), args);
                         break;
 
                     case "home":
@@ -122,6 +121,18 @@ public class FactionCommands implements CommandExecutor {
                         factionMap(((Player) commandSender));
                         break;
 
+                    case "rank":
+                        rank(((Player) commandSender));
+                        break;
+
+                    case "chown":
+                        changeOwnership(((Player) commandSender), args);
+                        break;
+
+                    case "setpower":
+                        setPower(((Player) commandSender), args);
+                        break;
+
                     case "version":
                         commandSender.sendMessage("§7MyFaction version §c1.0 §7by DrBrad.");
                         break;
@@ -135,13 +146,11 @@ public class FactionCommands implements CommandExecutor {
         return false;
     }
 
-    private HashMap<Player, String> invites = new HashMap<>();
-
     //PERFECT
     private void help(Player player, String[] args){
         if(args.length > 1){
             if(args[1].equals("2")){
-                player.sendMessage("§c------- §fFaction commands (2/4) §c-------");
+                player.sendMessage("§c------- §fFaction commands (2/5) §c-------");
                 player.sendMessage("§c/f disband: §7Deletes your faction.");
                 player.sendMessage("§c/f claim: §7Claim a chunk for your faction.");
                 player.sendMessage("§c/f unclaim: §7Removes claim from your faction.");
@@ -152,7 +161,7 @@ public class FactionCommands implements CommandExecutor {
                 return;
 
             }else if(args[1].equals("3")){
-                player.sendMessage("§c------- §fFaction commands (3/4) §c-------");
+                player.sendMessage("§c------- §fFaction commands (3/5) §c-------");
                 player.sendMessage("§c/f setwarp: §7Set a warp for your faction.");
                 player.sendMessage("§c/f delwarp: §7Removes a warp from your faction.");
                 player.sendMessage("§c/f power: §7Check yours or another factions power");
@@ -163,14 +172,24 @@ public class FactionCommands implements CommandExecutor {
                 return;
 
             }else if(args[1].equals("4")){
-                player.sendMessage("§c------- §fFaction commands (4/4) §c-------");
-                player.sendMessage("§c/f version: §7Get the version of this plugin.");
+                player.sendMessage("§c------- §fFaction commands (4/5) §c-------");
+                player.sendMessage("§c/f rank: §7Get your rank in faction.");
+                player.sendMessage("§c/f chown: §7Change faction ownership.");
+                player.sendMessage("§c/f setpower: §7Set factions power.");
+                player.sendMessage("§c/f claim safezone: §7Claim Safe-Zone for server.");
+                player.sendMessage("§c/f unclaim safezone: §7Unclaim Safe-Zone for server.");
+                player.sendMessage("§c/f claim pvpzone: §7Claim Pvp-Zone for server.");
+                player.sendMessage("§c/f unclaim pvpzone: §7Unclaim Pvp-Zone for server.");
                 return;
 
+            }else if(args[1].equals("5")){
+                player.sendMessage("§c------- §fFaction commands (5/5) §c-------");
+                player.sendMessage("§c/f version: §7Get the version of this plugin.");
+                return;
             }
         }
 
-        player.sendMessage("§c------- §fFaction commands (1/4) §c-------");
+        player.sendMessage("§c------- §fFaction commands (1/5) §c-------");
         player.sendMessage("§c/f create: §7Creates a faction.");
         player.sendMessage("§c/f invite: §7Invites player to faction.");
         player.sendMessage("§c/f join: §7Join faction from invite.");
@@ -184,7 +203,7 @@ public class FactionCommands implements CommandExecutor {
     private void listFactions(Player player){
         File factions = new File(plugin.getDataFolder()+File.separator+"factions");
         if(factions.exists() && factions.listFiles().length > 0){
-            String playersFaction = getFaction(player);
+            String playersFaction = getFaction(player.getUniqueId());
 
             for(File warps : factions.listFiles()){
                 String factionName = warps.getName();
@@ -208,12 +227,14 @@ public class FactionCommands implements CommandExecutor {
             String factionName = args[1];
 
             if(factionName.length() < 13 && factionName.length() > 1){
-                if(!factionName.equalsIgnoreCase("null")){
+                if(!factionName.equalsIgnoreCase("null") && !factionName.equalsIgnoreCase("Safe-Zone") &&
+                        !factionName.equalsIgnoreCase("SafeZone") && !factionName.equalsIgnoreCase("Wilderness") &&
+                        !factionName.equalsIgnoreCase("Pvp-Zone") && !factionName.equalsIgnoreCase("PvpZone")){
                     File factionFolder = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName);
 
                     if(!factionFolder.exists()){
-                        if(getFaction(player) == null){
-                            if(createFaction(player, factionName)){
+                        if(getFaction(player.getUniqueId()) == null){
+                            if(createFaction(player.getUniqueId(), factionName)){
                                 player.sendMessage("§7Faction §c"+factionName+"§7 was created.");
 
                             }else{
@@ -246,9 +267,9 @@ public class FactionCommands implements CommandExecutor {
                     File factionFolder = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+newFactionName);
 
                     if(!factionFolder.exists()){
-                        String factionName = getFaction(player);
+                        String factionName = getFaction(player.getUniqueId());
                         if(factionName != null){
-                            if(getPlayerRank(player, factionName) == 3){
+                            if(getPlayerRank(player.getUniqueId(), factionName) == 3){
                                 renameFaction(factionName, newFactionName);
                             }
                         }else{
@@ -271,24 +292,24 @@ public class FactionCommands implements CommandExecutor {
     //PERFECT
     private void invite(Player player, String[] args){
         if(args.length > 1){
-            String factionName = getFaction(player);
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
                 Player reqPlayer = plugin.getServer().getPlayer(args[1]);
 
                 if(reqPlayer != null && reqPlayer.isOnline()){
                     if(player.getUniqueId() != reqPlayer.getUniqueId()){
-                        if(getFaction(reqPlayer) == null){
-                            if(getPlayerRank(player, factionName) > 0){
-                                invites.put(reqPlayer, factionName);
-                                player.sendMessage("§7You have invited §c"+reqPlayer.getDisplayName()+"§7 to the faction, this invite will expire in §c30s§7.");
-                                reqPlayer.sendMessage("§7"+player.getDisplayName()+" §7has invited you to join §c"+factionName+"§7!");
+                        if(getFaction(reqPlayer.getUniqueId()) == null){
+                            if(getPlayerRank(player.getUniqueId(), factionName) > 0){
+                                invites.put(reqPlayer.getPlayer(), factionName);
+                                player.sendMessage("§7You have invited §c"+reqPlayer.getName()+"§7 to the faction.");
+                                reqPlayer.getPlayer().sendMessage("§7"+player.getDisplayName()+" §7has invited you to join §c"+factionName+"§7, this invite will expire in §c30s§7.");
 
                                 plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
                                     @Override
                                     public void run(){
                                         if(invites.containsKey(reqPlayer)){
                                             invites.remove(reqPlayer);
-                                            reqPlayer.sendMessage("§7Faction invite to §c"+factionName+"§7 has expired!");
+                                            reqPlayer.getPlayer().sendMessage("§7Faction invite to §c"+factionName+"§7 has expired!");
                                         }
                                     }
                                 }, 600);
@@ -316,11 +337,11 @@ public class FactionCommands implements CommandExecutor {
 
     //PERFECT
     private void join(Player player){
-        if(getFaction(player) == null){
+        if(getFaction(player.getUniqueId()) == null){
             if(invites.containsKey(player)){
                 String factionName = invites.get(player);
 
-                if(addPlayerToFaction(player, factionName)){
+                if(addPlayerToFaction(player.getUniqueId(), factionName)){
                     invites.remove(player);
                     player.sendMessage("§7You have joined §c"+factionName+"§7.");
 
@@ -346,10 +367,10 @@ public class FactionCommands implements CommandExecutor {
 
     //PERFECT
     private void leave(Player player){
-        String factionName = getFaction(player);
+        String factionName = getFaction(player.getUniqueId());
         if(factionName != null){
-            if(getPlayerRank(player, factionName) != 3){
-                if(removePlayerFromFaction(player, factionName)){
+            if(getPlayerRank(player.getUniqueId(), factionName) < 3){
+                if(removePlayerFromFaction(player.getUniqueId(), factionName)){
                     player.sendMessage("§7You have left §c"+factionName+"§7.");
                 }else{
                     player.sendMessage("§cFailed to leave faction.");
@@ -365,20 +386,21 @@ public class FactionCommands implements CommandExecutor {
     //PERFECT
     private void remove(Player player, String[] args){
         if(args.length > 1){
-            String factionName = getFaction(player);
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
-                Player reqPlayer = plugin.getServer().getPlayer(args[1]);
+                OfflinePlayer reqPlayer = resolvePlayer(args[1]);
 
                 if(reqPlayer != null){
-                    String reqFaction = getFaction(reqPlayer);
+                    String reqFaction = getFaction(reqPlayer.getUniqueId());
                     if(reqFaction != null && reqFaction.equals(factionName)){
                         if(player.getUniqueId() != reqPlayer.getUniqueId()){
-                            if(getPlayerRank(player, factionName) > getPlayerRank(reqPlayer, factionName)){
-                                if(removePlayerFromFaction(reqPlayer, factionName)){
-                                    player.sendMessage("§7You have removed §c"+reqPlayer.getDisplayName()+" from the faction.");
+                            int rank = getPlayerRank(player.getUniqueId(), factionName);
+                            if(rank > 1 && getPlayerRank(reqPlayer.getUniqueId(), factionName) < rank){
+                                if(removePlayerFromFaction(reqPlayer.getUniqueId(), factionName)){
+                                    player.sendMessage("§7You have removed §c"+reqPlayer.getName()+"§7 from the faction.");
 
                                     if(reqPlayer.isOnline()){
-                                        reqPlayer.sendMessage("§7You have been removed from the faction by §c"+player.getDisplayName()+"§7.");
+                                        reqPlayer.getPlayer().sendMessage("§7You have been removed from the faction by §c"+player.getDisplayName()+"§7.");
                                     }
                                 }else{
                                     player.sendMessage("§cFailed to remove player from faction.");
@@ -407,26 +429,29 @@ public class FactionCommands implements CommandExecutor {
     //PERFECT
     private void promote(Player player, String[] args){
         if(args.length > 1){
-            String factionName = getFaction(player);
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
-                Player reqPlayer = plugin.getServer().getPlayer(args[1]);
+                OfflinePlayer reqPlayer = resolvePlayer(args[1]);
+
                 if(reqPlayer != null){
-                    String reqFaction = getFaction(reqPlayer);
+                    String reqFaction = getFaction(reqPlayer.getUniqueId());
                     if(reqFaction != null && reqFaction.equals(factionName)){
                         if(player.getUniqueId() != reqPlayer.getUniqueId()){
-                            if(getPlayerRank(player, factionName) == 3){
-                                if(getPlayerRank(reqPlayer, factionName) < 3){
-                                    if(promotePlayer(reqPlayer, factionName)){
-                                        player.sendMessage("§7You have promoted §c"+reqPlayer.getDisplayName()+"§7.");
+                            if(getPlayerRank(player.getUniqueId(), factionName) == 3){
+                                int rank = getPlayerRank(reqPlayer.getUniqueId(), factionName);
+                                if(rank < 2){
+                                    if(promotePlayer(reqPlayer.getUniqueId(), factionName)){
+                                        String[] names = { "Member", "Recruit", "Admin", "Owner" };
+                                        player.sendMessage("§7You have promoted §c"+reqPlayer.getName()+"§7 to §c"+names[rank+1]+"§7.");
 
                                         if(reqPlayer.isOnline()){
-                                            reqPlayer.sendMessage("§7You have been promoted to promoted §cAdmin§7 in faction.");
+                                            reqPlayer.getPlayer().sendMessage("§7You have been promoted to promoted to §c"+names[rank+1]+"§7 in faction.");
                                         }
                                     }else{
                                         player.sendMessage("§cFailed to promote player.");
                                     }
                                 }else{
-                                    player.sendMessage("§c"+reqPlayer.getDisplayName()+"§7 is already admin, you can transfer your ownership by typing §c/f chown§7.");
+                                    player.sendMessage("§c"+reqPlayer.getName()+"§7 is already §cadmin§7, you can transfer your ownership by typing §c/f chown§7.");
                                 }
                             }else{
                                 player.sendMessage("§cYou must be the owner of the faction to promote.");
@@ -435,7 +460,7 @@ public class FactionCommands implements CommandExecutor {
                             player.sendMessage("§cYou cannot promote yourself in the faction.");
                         }
                     }else{
-                        player.sendMessage("§cYou cannot remove yourself from the faction.");
+                        player.sendMessage("§cYou cannot promote yourself from the faction.");
                     }
                 }else{
                     player.sendMessage("§cThe player specified doesn't exist.");
@@ -443,26 +468,31 @@ public class FactionCommands implements CommandExecutor {
             }else{
                 player.sendMessage("§cYou aren't in a faction.");
             }
+        }else{
+            player.sendMessage("§cYou must include a player name that you wish to promote.");
         }
     }
 
     //PERFECT
     private void demote(Player player, String[] args){
         if(args.length > 1){
-            String factionName = getFaction(player);
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
-                Player reqPlayer = plugin.getServer().getPlayer(args[1]);
+                OfflinePlayer reqPlayer = resolvePlayer(args[1]);
+
                 if(reqPlayer != null){
-                    String reqFaction = getFaction(reqPlayer);
+                    String reqFaction = getFaction(reqPlayer.getUniqueId());
                     if(reqFaction != null && reqFaction.equals(factionName)){
                         if(player.getUniqueId() != reqPlayer.getUniqueId()){
-                            if(getPlayerRank(player, factionName) == 3){
-                                if(getPlayerRank(reqPlayer, factionName) > 0){
-                                    if(demotePlayer(player, factionName)){
-                                        player.sendMessage("§7You have demoted §c"+reqPlayer.getDisplayName()+"§7.");
+                            if(getPlayerRank(player.getUniqueId(), factionName) == 3){
+                                int rank = getPlayerRank(reqPlayer.getUniqueId(), factionName);
+                                if(rank > 0){
+                                    if(demotePlayer(reqPlayer.getUniqueId(), factionName)){
+                                        String[] names = { "Member", "Recruit", "Admin", "Owner" };
+                                        player.sendMessage("§7You have demoted §c"+reqPlayer.getName()+"§7 to §c"+names[rank-1]+"§7.");
 
                                         if(reqPlayer.isOnline()){
-                                            reqPlayer.sendMessage("§7You have been demoted to promoted §cRecruit§7 in faction.");
+                                            reqPlayer.getPlayer().sendMessage("§7You have been demoted to §c"+names[rank-1]+"§7 in faction.");
                                         }
                                     }else{
                                         player.sendMessage("§cFailed to demote player.");
@@ -471,13 +501,13 @@ public class FactionCommands implements CommandExecutor {
                                     player.sendMessage("§cYou cannot demote a this person further.");
                                 }
                             }else{
-                                player.sendMessage("§cYou must be the owner of the faction to promote.");
+                                player.sendMessage("§cYou must be the owner of the faction to demote.");
                             }
                         }else{
-                            player.sendMessage("§cYou cannot promote yourself in the faction.");
+                            player.sendMessage("§cYou cannot demote yourself in the faction.");
                         }
                     }else{
-                        player.sendMessage("§cYou cannot remove yourself from the faction.");
+                        player.sendMessage("§cYou cannot demote yourself from the faction.");
                     }
                 }else{
                     player.sendMessage("§cThe player specified doesn't exist.");
@@ -485,14 +515,16 @@ public class FactionCommands implements CommandExecutor {
             }else{
                 player.sendMessage("§cYou aren't in a faction.");
             }
+        }else{
+            player.sendMessage("§cYou must include a player name that you wish to demote.");
         }
     }
 
     //PERFECT
     private void disband(Player player){
-        String factionName = getFaction(player);
+        String factionName = getFaction(player.getUniqueId());
         if(factionName != null){
-            if(getPlayerRank(player, factionName) == 3){
+            if(getPlayerRank(player.getUniqueId(), factionName) == 3){
                 disbandFaction(factionName);
             }
         }else{
@@ -501,52 +533,176 @@ public class FactionCommands implements CommandExecutor {
     }
 
     //PERFECT
-    private void claim(Player player){
-        String factionName = getFaction(player);
-        if(factionName != null){
-            if(getPlayerRank(player, factionName) > 1){
-                String claim = inClaim(player.getLocation().getChunk());
-                if(claim == null || getFactionPower(claim) < 0){
-                    int power = getFactionPower(factionName);
-                    if(power > 1){
-                        if(claimForFaction(factionName, player.getLocation().getChunk(), power)){
-                            player.sendMessage("§7You have claimed this chunk!");
+    private void claim(Player player, String[] args){
+        if(args.length > 1){
+            if(args[1].equalsIgnoreCase("safezone") || args[1].equalsIgnoreCase("safe-zone")){
+                if(player.isOp()){
+                    String claim = inClaim(player.getLocation().getChunk());
+                    if(claim != null){
+                        if(claim.equalsIgnoreCase("Safe-Zone")){
+                            player.sendMessage("§cThis chunk is already claimed as Safe-Zone.");
+                            return;
+                        }else if(claim.equalsIgnoreCase("Pvp-Zone")){
+                            unclaimPvpZone(player.getLocation().getChunk());
                         }else{
-                            player.sendMessage("§cFailed to claim chunk.");
+                            unclaimForFaction(claim, player.getLocation().getChunk(), getFactionPower(claim));
+                        }
+                    }
+
+                    if(claimSafeZone(player.getLocation().getChunk())){
+                        player.sendMessage("§7You have claimed this chunk as a §aSafe-Zone§7!");
+
+                        if(mappedChunks.containsKey(player)){
+                            mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                            viewClaims(player, player.getLocation().getChunk());
                         }
                     }else{
-                        player.sendMessage("§cYou don't have enough power to claim.");
+                        player.sendMessage("§cFailed to claim chunk as Safe-Zone.");
                     }
                 }else{
-                    player.sendMessage("§cThis chunk is claimed by a faction with enough power to keep it.");
+                    player.sendMessage("§cOnly server admins can claim Safe-Zone.");
+                }
+
+            }else if(args[1].equalsIgnoreCase("pvpzone") || args[1].equalsIgnoreCase("pvp-zone")){
+                if(player.isOp()){
+                    String claim = inClaim(player.getLocation().getChunk());
+                    if(claim != null){
+                        if(claim.equalsIgnoreCase("Pvp-Zone")){
+                            player.sendMessage("§cThis chunk is already claimed as Pvp-Zone.");
+                            return;
+                        }else if(claim.equalsIgnoreCase("Safe-Zone")){
+                            unclaimSafeZone(player.getLocation().getChunk());
+                        }else{
+                            unclaimForFaction(claim, player.getLocation().getChunk(), getFactionPower(claim));
+                        }
+                    }
+
+                    if(claimPvpZone(player.getLocation().getChunk())){
+                        player.sendMessage("§7You have claimed this chunk as a §aPvp-Zone§7!");
+
+                        if(mappedChunks.containsKey(player)){
+                            mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                            viewClaims(player, player.getLocation().getChunk());
+                        }
+                    }else{
+                        player.sendMessage("§cFailed to claim chunk as Pvp-Zone.");
+                    }
+                }else{
+                    player.sendMessage("§cOnly server admins can claim Pvp-Zone.");
+                }
+
+            }else{
+                player.sendMessage("§cIf you wish to claim a Safe-Zone or Pvp-Zone please specify that.");
+            }
+
+        }else{
+            String factionName = getFaction(player.getUniqueId());
+            if(factionName != null){
+                if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                    String claim = inClaim(player.getLocation().getChunk());
+                    if(claim == null || getFactionPower(claim) < 0){
+                        int power = getFactionPower(factionName);
+                        if(power > claimPower-1){
+                            if(claimForFaction(factionName, player.getLocation().getChunk(), power)){
+                                player.sendMessage("§7You have claimed this chunk!");
+
+                                if(mappedChunks.containsKey(player)){
+                                    mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                    viewClaims(player, player.getLocation().getChunk());
+                                }
+                            }else{
+                                player.sendMessage("§cFailed to claim chunk.");
+                            }
+                        }else{
+                            player.sendMessage("§cYou don't have enough power to claim.");
+                        }
+                    }else{
+                        player.sendMessage("§cThis chunk is claimed by a faction with enough power to keep it.");
+                    }
+                }else{
+                    player.sendMessage("§cInsufficient permission, you cannot claim.");
                 }
             }else{
-                player.sendMessage("§cInsufficient permission, you cannot claim.");
+                player.sendMessage("§cYou must be in a faction to claim!");
             }
-        }else{
-            player.sendMessage("§cYou must be in a faction to claim!");
         }
     }
 
     //PERFECT
-    private void unclaim(Player player){
-        String factionName = getFaction(player);
-        if(factionName != null){
-            if(getPlayerRank(player, factionName) > 1){
-                if(inClaim(player.getLocation().getChunk()).equals(factionName)){
-                    if(unclaimForFaction(factionName, player.getLocation().getChunk(), getFactionPower(factionName))){
-                        player.sendMessage("§7You have unclaimed this chunk!");
+    private void unclaim(Player player, String[] args){
+        if(args.length > 1){
+            if(args[1].equalsIgnoreCase("safezone") || args[1].equalsIgnoreCase("safe-zone")){
+                if(player.isOp()){
+                    String claim = inClaim(player.getLocation().getChunk());
+
+                    if(claim.equalsIgnoreCase("Safe-Zone")){
+                        if(unclaimSafeZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have unclaimed §aSafe-Zone§7 chunk!");
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to unclaim Safe-Zone chunks.");
+                        }
                     }else{
-                        player.sendMessage("§cFailed to claim chunk.");
+                        player.sendMessage("§cNo Safe-Zone chunk for you to unclaim.");
                     }
                 }else{
-                    player.sendMessage("§cThis chunk is not your claim.");
+                    player.sendMessage("§cOnly server admins can unclaim Safe-Zone.");
+                }
+
+            }else if(args[1].equalsIgnoreCase("pvpzone") || args[1].equalsIgnoreCase("pvp-zone")){
+                if(player.isOp()){
+                    String claim = inClaim(player.getLocation().getChunk());
+
+                    if(claim.equalsIgnoreCase("Pvp-Zone")){
+                        if(unclaimPvpZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have unclaimed §aPvp-Zone§7 chunk!");
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to unclaim Pvp-Zone chunks.");
+                        }
+                    }else{
+                        player.sendMessage("§cNo Pvp-Zone chunk for you to unclaim.");
+                    }
+                }else{
+                    player.sendMessage("§cOnly server admins can unclaim Pvp-Zone.");
+                }
+
+            }else{
+                player.sendMessage("§cIf you wish to claim a Safe-Zone or Pvp-Zone please specify that.");
+            }
+
+        }else{
+            String factionName = getFaction(player.getUniqueId());
+            if(factionName != null){
+                if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                    if(inClaim(player.getLocation().getChunk()).equals(factionName)){
+                        if(unclaimForFaction(factionName, player.getLocation().getChunk(), getFactionPower(factionName))){
+                            player.sendMessage("§7You have unclaimed this chunk!");
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to claim chunk.");
+                        }
+                    }else{
+                        player.sendMessage("§cThis chunk is not your claim.");
+                    }
+                }else{
+                    player.sendMessage("§cInsufficient permission, you cannot claim.");
                 }
             }else{
-                player.sendMessage("§cInsufficient permission, you cannot claim.");
+                player.sendMessage("§cYou must be in a faction to claim!");
             }
-        }else{
-            player.sendMessage("§cYou must be in a faction to claim!");
         }
     }
 
@@ -558,7 +714,7 @@ public class FactionCommands implements CommandExecutor {
                 player.sendMessage("§c"+args[1]+"§7 power level is: §c"+getFactionPower(args[1])+"§7.");
             }
         }else{
-            String factionName = getFaction(player);
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
                 player.sendMessage("§c"+factionName+"§7 power level is: §c"+getFactionPower(factionName)+"§7.");
             }else{
@@ -569,183 +725,212 @@ public class FactionCommands implements CommandExecutor {
 
     //PERFECT
     private void home(Player player){
-        String factionName = getFaction(player);
-        if(factionName != null){
-            File factionHome = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"home.yml");
-            if(factionHome.exists()){
-                FileConfiguration config = YamlConfiguration.loadConfiguration(factionHome);
-
-                teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                        config.getDouble("y"), config.getDouble("z")), "Faction Home");
-
-            }else{
-                player.sendMessage("§cYour faction doesn't have a faction home.");
-            }
-        }else{
-            player.sendMessage("§cYou aren't a part of any faction.");
-        }
-    }
-
-    //PERFECT
-    private void setHome(Player player){
-        String factionName = getFaction(player);
-        if(factionName != null){
-            if(getPlayerRank(player, factionName) > 1){
-                if(inClaim(player.getLocation().getChunk()).equals(factionName)){
-                    try{
-                        File factionHome = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"home.yml");
-                        FileConfiguration config = YamlConfiguration.loadConfiguration(factionHome);
-                        config.set("world", player.getLocation().getWorld().getName());
-                        config.set("x", player.getLocation().getX());
-                        config.set("y", player.getLocation().getY());
-                        config.set("z", player.getLocation().getZ());
-                        config.save(factionHome);
-
-                        player.sendMessage("§7You have set the factions home.");
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        player.sendMessage("§cError setting your factions home.");
-                    }
-                }else{
-                    player.sendMessage("§cYou can only set your factions home within your claim.");
-                }
-            }else{
-                player.sendMessage("§cInsufficient permissions to set home.");
-            }
-        }else{
-            player.sendMessage("§cYou aren't a part of any faction.");
-        }
-    }
-
-    //PERFECT
-    private void warp(Player player, String[] args){
-        if(args.length > 1){
-            String warpName = args[1];
-
-            String factionName = getFaction(player);
+        if(factionHome){
+            String factionName = getFaction(player.getUniqueId());
             if(factionName != null){
-                File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
-                if(factionWarp.exists()){
-                    FileConfiguration config = YamlConfiguration.loadConfiguration(factionWarp);
+                File factionHome = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"home.yml");
+                if(factionHome.exists()){
+                    FileConfiguration config = YamlConfiguration.loadConfiguration(factionHome);
 
                     teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                            config.getDouble("y"), config.getDouble("z")), warpName);
+                            config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), "Faction Home");
 
                 }else{
-                    player.sendMessage("§cYour faction doesn't have that warp.");
+                    player.sendMessage("§cYour faction doesn't have a faction home.");
                 }
             }else{
                 player.sendMessage("§cYou aren't a part of any faction.");
             }
         }else{
-            player.sendMessage("§cPlease specify a warp name.");
+            player.sendMessage("§Homes are not allowed for factions.");
+        }
+    }
+
+    //PERFECT
+    private void setHome(Player player){
+        if(factionHome){
+            String factionName = getFaction(player.getUniqueId());
+            if(factionName != null){
+                if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                    if(inClaim(player.getLocation().getChunk()).equals(factionName)){
+                        try{
+                            File factionHome = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"home.yml");
+                            FileConfiguration config = YamlConfiguration.loadConfiguration(factionHome);
+                            config.set("world", player.getLocation().getWorld().getName());
+                            config.set("x", player.getLocation().getX());
+                            config.set("y", player.getLocation().getY());
+                            config.set("z", player.getLocation().getZ());
+                            config.set("yaw", player.getLocation().getYaw());
+                            config.set("pitch", player.getLocation().getPitch());
+                            config.save(factionHome);
+
+                            player.sendMessage("§7You have set the factions home.");
+                        }catch(Exception e){
+                            e.printStackTrace();
+                            player.sendMessage("§cError setting your factions home.");
+                        }
+                    }else{
+                        player.sendMessage("§cYou can only set your factions home within your claim.");
+                    }
+                }else{
+                    player.sendMessage("§cInsufficient permissions to set home.");
+                }
+            }else{
+                player.sendMessage("§cYou aren't a part of any faction.");
+            }
+        }else{
+            player.sendMessage("§Homes are not allowed for factions.");
+        }
+    }
+
+    //PERFECT
+    private void warp(Player player, String[] args){
+        if(warps){
+            if(args.length > 1){
+                String warpName = args[1];
+
+                String factionName = getFaction(player.getUniqueId());
+                if(factionName != null){
+                    File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
+                    if(factionWarp.exists()){
+                        FileConfiguration config = YamlConfiguration.loadConfiguration(factionWarp);
+
+                        teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
+                                config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), warpName);
+
+                    }else{
+                        player.sendMessage("§cYour faction doesn't have that warp.");
+                    }
+                }else{
+                    player.sendMessage("§cYou aren't a part of any faction.");
+                }
+            }else{
+                player.sendMessage("§cPlease specify a warp name.");
+            }
+        }else{
+            player.sendMessage("§cWarps are not allowed for factions.");
         }
     }
 
     //PERFECT
     private void listWarps(Player player){
-        String factionName = getFaction(player);
-        if(factionName != null){
-            File factionWarps = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps");
-            if(factionWarps.exists() && factionWarps.listFiles().length > 0){
-                String builder = "";
-                for(File warp : factionWarps.listFiles()){
-                    builder += "§c"+warp.getName().substring(0, warp.getName().length()-4)+"§7, ";
-                }
-                builder = builder.substring(0, builder.length()-2);
+        if(warps){
+            String factionName = getFaction(player.getUniqueId());
+            if(factionName != null){
+                File factionWarps = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps");
+                if(factionWarps.exists() && factionWarps.listFiles().length > 0){
+                    String builder = "";
+                    for(File warp : factionWarps.listFiles()){
+                        builder += "§c"+warp.getName().substring(0, warp.getName().length()-4)+"§7, ";
+                    }
+                    builder = builder.substring(0, builder.length()-2);
 
-                player.sendMessage("§7Factions warps: "+builder+".");
+                    player.sendMessage("§7Factions warps: "+builder+".");
+                }else{
+                    player.sendMessage("§cYour faction has no warps.");
+                }
             }else{
-                player.sendMessage("§cYour faction has no warps.");
+                player.sendMessage("§cYou aren't a part of any faction.");
             }
         }else{
-            player.sendMessage("§cYou aren't a part of any faction.");
+            player.sendMessage("§cWarps are not allowed for factions.");
         }
     }
 
     //PERFECT
     private void setWarp(Player player, String[] args){
-        if(args.length > 1){
-            String warpName = args[1];
-            if(warpName.length() < 13 && warpName.length() > 1){
-                String factionName = getFaction(player);
-                if(factionName != null){
-                    if(getPlayerRank(player, factionName) > 1){
-                        if(inClaim(player.getLocation().getChunk()).equals(factionName)){
-                            try{
-                                File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
-                                FileConfiguration config = YamlConfiguration.loadConfiguration(factionWarp);
-                                config.set("world", player.getLocation().getWorld().getName());
-                                config.set("x", player.getLocation().getX());
-                                config.set("y", player.getLocation().getY());
-                                config.set("z", player.getLocation().getZ());
-                                config.save(factionWarp);
+        if(warps){
+            if(args.length > 1){
+                String warpName = args[1];
+                if(warpName.length() < 13 && warpName.length() > 1){
+                    String factionName = getFaction(player.getUniqueId());
+                    if(factionName != null){
+                        if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                            if(inClaim(player.getLocation().getChunk()).equals(factionName)){
+                                try{
+                                    File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
+                                    FileConfiguration config = YamlConfiguration.loadConfiguration(factionWarp);
+                                    config.set("world", player.getLocation().getWorld().getName());
+                                    config.set("x", player.getLocation().getX());
+                                    config.set("y", player.getLocation().getY());
+                                    config.set("z", player.getLocation().getZ());
+                                    config.set("yaw", player.getLocation().getYaw());
+                                    config.set("pitch", player.getLocation().getPitch());
+                                    config.save(factionWarp);
 
-                                setFactionPower(factionName, getFactionPower(factionName)-2);
+                                    setFactionPower(factionName, getFactionPower(factionName)-warpCost);
 
-                                player.sendMessage("§7You have set faction warp §c"+warpName+"§7.");
-                            }catch(Exception e){
-                                e.printStackTrace();
-                                player.sendMessage("§cError setting warp.");
+                                    player.sendMessage("§7You have set faction warp §c"+warpName+"§7.");
+                                }catch(Exception e){
+                                    e.printStackTrace();
+                                    player.sendMessage("§cError setting warp.");
+                                }
+                            }else{
+                                player.sendMessage("§cYou can only set your factions home within your claim.");
                             }
                         }else{
-                            player.sendMessage("§cYou can only set your factions home within your claim.");
+                            player.sendMessage("§cInsufficient permissions to set warp.");
                         }
                     }else{
-                        player.sendMessage("§cInsufficient permissions to set warp.");
+                        player.sendMessage("§cYou aren't a part of any faction.");
                     }
                 }else{
-                    player.sendMessage("§cYou aren't a part of any faction.");
+                    player.sendMessage("§cThe name exceeds character requirements.");
                 }
             }else{
-                player.sendMessage("§cThe name exceeds character requirements.");
+                player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
-            player.sendMessage("§cPlease specify a warp name.");
+            player.sendMessage("§cWarps are not allowed for factions.");
         }
     }
 
     //PERFECT
     private void removeWarp(Player player, String[] args){
-        if(args.length > 1){
-            String warpName = args[1];
-            if(warpName.length() < 13 && warpName.length() > 1){
-                String factionName = getFaction(player);
-                if(factionName != null){
-                    if(getPlayerRank(player, factionName) > 1){
-                        if(inClaim(player.getLocation().getChunk()).equals(factionName)){
-                            try{
-                                File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
-                                if(factionWarp.exists()){
-                                    factionWarp.delete();
+        if(warps){
+            if(args.length > 1){
+                String warpName = args[1];
+                if(warpName.length() < 13 && warpName.length() > 1){
+                    String factionName = getFaction(player.getUniqueId());
+                    if(factionName != null){
+                        if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                            if(inClaim(player.getLocation().getChunk()).equals(factionName)){
+                                try{
+                                    File factionWarp = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+factionName+File.separator+"warps"+File.separator+warpName+".yml");
+                                    if(factionWarp.exists()){
+                                        factionWarp.delete();
+                                    }
+
+                                    setFactionPower(factionName, getFactionPower(factionName)+warpCost);
+
+                                    player.sendMessage("§7You have removed faction warp §c"+warpName+"§7.");
+                                }catch(Exception e){
+                                    e.printStackTrace();
+                                    player.sendMessage("§cError removing warp.");
                                 }
-
-                                setFactionPower(factionName, getFactionPower(factionName)+2);
-
-                                player.sendMessage("§7You have removed faction warp §c"+warpName+"§7.");
-                            }catch(Exception e){
-                                e.printStackTrace();
-                                player.sendMessage("§cError removing warp.");
+                            }else{
+                                player.sendMessage("§cYou can only set your factions home within your claim.");
                             }
                         }else{
-                            player.sendMessage("§cYou can only set your factions home within your claim.");
+                            player.sendMessage("§cInsufficient permissions to set warp.");
                         }
                     }else{
-                        player.sendMessage("§cInsufficient permissions to set warp.");
+                        player.sendMessage("§cYou aren't a part of any faction.");
                     }
                 }else{
-                    player.sendMessage("§cYou aren't a part of any faction.");
+                    player.sendMessage("§cThe name exceeds character requirements.");
                 }
             }else{
-                player.sendMessage("§cThe name exceeds character requirements.");
+                player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
-            player.sendMessage("§cPlease specify a warp name.");
+            player.sendMessage("§cWarps are not allowed for factions.");
         }
     }
 
+    //PERFECT
     private void factionChat(Player player){
-        String factionName = getFaction(player);
+        String factionName = getFaction(player.getUniqueId());
         if(factionName != null){
             if(factionChat.contains(player)){
                 factionChat.remove(player);
@@ -771,11 +956,111 @@ public class FactionCommands implements CommandExecutor {
             }
 
             mappedChunks.remove(player);
-            player.sendMessage("§7You have are no longer mapping factions around you.");
+            player.sendMessage("§7You are no longer mapping factions around you.");
 
         }else{
             mapFactions.add(player);
-            player.sendMessage("§7You have are now mapping factions around you.");
+            viewClaims(player, player.getLocation().getChunk());
+            player.sendMessage("§7You are now mapping factions around you.");
         }
+    }
+
+    //PERFECT
+    private void rank(Player player){
+        String factionName = getFaction(player.getUniqueId());
+        if(factionName != null){
+            int rank = getPlayerRank(player.getUniqueId(), factionName);
+            String[] names = { "Member", "Recruit", "Admin", "Owner" };
+            player.sendMessage("§7Your rank in the faction is §c"+names[rank]+"§7.");
+
+        }else{
+            player.sendMessage("§cYou aren't a part of any faction.");
+        }
+    }
+
+    //PERFECT
+    private void changeOwnership(Player player, String[] args){
+        if(args.length > 1){
+            String factionName = getFaction(player.getUniqueId());
+            if(factionName != null){
+                OfflinePlayer reqPlayer = resolvePlayer(args[1]);
+
+                if(reqPlayer != null){
+                    String reqFaction = getFaction(reqPlayer.getUniqueId());
+                    if(reqFaction != null && reqFaction.equals(factionName)){
+                        if(player.getUniqueId() != reqPlayer.getUniqueId()){
+                            if(getPlayerRank(player.getUniqueId(), factionName) == 3){
+                                if(changeFactionOwnership(player.getUniqueId(), reqPlayer.getUniqueId(), factionName)){
+                                    player.sendMessage("§7You have changed faction ownership to §c"+reqPlayer.getName()+"§7.");
+
+                                    if(reqPlayer.isOnline()){
+                                        reqPlayer.getPlayer().sendMessage("§7You are now the faction §6Owner§7 in faction.");
+                                    }
+                                }else{
+                                    player.sendMessage("§cFailed to change ownership to player.");
+                                }
+                            }else{
+                                player.sendMessage("§cYou must be the owner of the faction to promote.");
+                            }
+                        }else{
+                            player.sendMessage("§cYou cannot promote yourself in the faction.");
+                        }
+                    }else{
+                        player.sendMessage("§cYou cannot remove yourself from the faction.");
+                    }
+                }else{
+                    player.sendMessage("§cThe player specified doesn't exist.");
+                }
+            }else{
+                player.sendMessage("§cYou aren't in a faction.");
+            }
+        }else{
+            player.sendMessage("§cYou must include a player name that you wish to demote.");
+        }
+
+    }
+
+    //PERFECT
+    private void setPower(Player player, String[] args){
+        if(args.length > 2){
+            if(player.isOp()){
+                File factionFolder = new File(plugin.getDataFolder()+File.separator+"factions"+File.separator+args[1]);
+
+                if(!factionFolder.exists()){
+                    int power = Integer.parseInt(args[2]);
+
+                    if(setFactionPower(args[1], power)){
+                        player.sendMessage("§c"+args[1]+"§7 power has been set to §c"+power+"§7.");
+
+                    }else{
+                        player.sendMessage("§cFailed to set faction power.");
+                    }
+
+                }else{
+                    player.sendMessage("§cFaction specified doesn't exist.");
+                }
+            }else{
+                player.sendMessage("§cYou must be server admin to set faction power.");
+            }
+        }else{
+            player.sendMessage("§cYou must specify a faction and the power you wish to set.");
+        }
+    }
+
+    //PERFECT
+    private OfflinePlayer resolvePlayer(String playerName){
+        try{
+            File pnr = new File(plugin.getDataFolder()+File.separator+"pnr.yml");
+            FileConfiguration config = YamlConfiguration.loadConfiguration(pnr);
+
+            if(config.contains(playerName)){
+                OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(UUID.fromString(config.getString(playerName)));
+                return offlinePlayer;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

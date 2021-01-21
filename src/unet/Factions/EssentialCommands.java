@@ -1,7 +1,7 @@
 package unet.Factions;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,11 +10,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.UUID;
 
+import static unet.Factions.Config.*;
 import static unet.Factions.Handlers.*;
 import static unet.Factions.Main.*;
+import static unet.Factions.Faction.*;
 
 public class EssentialCommands  implements CommandExecutor {
 
@@ -66,11 +66,14 @@ public class EssentialCommands  implements CommandExecutor {
                     tpa(((Player) commandSender), args);
                     break;
 
+                case "wild":
+                    wild(((Player) commandSender), 0);
+                    break;
+
                 case "back":
                     back(((Player) commandSender));
                     break;
             }
-
         }
 
         return false;
@@ -85,7 +88,7 @@ public class EssentialCommands  implements CommandExecutor {
                 FileConfiguration config = YamlConfiguration.loadConfiguration(warp);
 
                 teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                        config.getDouble("y"), config.getDouble("z")), warpName);
+                        config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), warpName);
 
             }else{
                 player.sendMessage("§cThe warp specified doesn't exist");
@@ -127,6 +130,8 @@ public class EssentialCommands  implements CommandExecutor {
                         config.set("x", player.getLocation().getX());
                         config.set("y", player.getLocation().getY());
                         config.set("z", player.getLocation().getZ());
+                        config.set("yaw", player.getLocation().getYaw());
+                        config.set("pitch", player.getLocation().getPitch());
                         config.save(warp);
 
                         player.sendMessage("§7You have set the warp §c"+warpName+"§7.");
@@ -179,7 +184,7 @@ public class EssentialCommands  implements CommandExecutor {
             FileConfiguration config = YamlConfiguration.loadConfiguration(home);
 
             teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                    config.getDouble("y"), config.getDouble("z")), "Home");
+                    config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), "Home");
 
         }else{
             player.sendMessage("§cYou don't seem to have a home set.");
@@ -199,6 +204,8 @@ public class EssentialCommands  implements CommandExecutor {
             config.set("x", player.getLocation().getX());
             config.set("y", player.getLocation().getY());
             config.set("z", player.getLocation().getZ());
+            config.set("yaw", player.getLocation().getYaw());
+            config.set("pitch", player.getLocation().getPitch());
             config.save(warp);
 
             player.sendMessage("§7You have set your home.");
@@ -215,7 +222,7 @@ public class EssentialCommands  implements CommandExecutor {
             FileConfiguration config = YamlConfiguration.loadConfiguration(spawn);
 
             teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                    config.getDouble("y"), config.getDouble("z")), "Spawn");
+                    config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), "Spawn");
 
         }else{
             player.sendMessage("§cTheir doesn't seem to be a spawn set.");
@@ -231,6 +238,8 @@ public class EssentialCommands  implements CommandExecutor {
                 config.set("x", player.getLocation().getX());
                 config.set("y", player.getLocation().getY());
                 config.set("z", player.getLocation().getZ());
+                config.set("yaw", player.getLocation().getYaw());
+                config.set("pitch", player.getLocation().getPitch());
                 config.save(spawn);
 
                 player.sendMessage("§7You have set server spawn.");
@@ -251,8 +260,6 @@ public class EssentialCommands  implements CommandExecutor {
                 if(reqPlayer != player){
                     playerTeleport.put(reqPlayer, player);
 
-                    player.sendMessage(player.getDisplayName()+" -> "+reqPlayer.getDisplayName());
-
                     player.sendMessage("§7Teleport request sent to §c"+reqPlayer.getDisplayName()+"§7.");
                     reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 wishes to teleport, please type §a/tpaa§7 to accept or §c/tpad§7to deny, this will expire in §c30s§7.");
 
@@ -261,6 +268,7 @@ public class EssentialCommands  implements CommandExecutor {
                         public void run(){
                             if(playerTeleport.containsKey(reqPlayer)){
                                 playerTeleport.remove(reqPlayer);
+                                //TELL USER THE SAME
                                 reqPlayer.sendMessage("§7Teleport request has expired!");
                             }
                         }
@@ -277,7 +285,6 @@ public class EssentialCommands  implements CommandExecutor {
     }
 
     private void tpaa(Player player){
-        player.sendMessage(player.getDisplayName()+" <- "+playerTeleport.size());
         if(playerTeleport.containsKey(player)){
             Player reqPlayer = playerTeleport.get(player);
 
@@ -306,12 +313,69 @@ public class EssentialCommands  implements CommandExecutor {
         }
     }
 
+    private void wild(Player player, int attempts){
+        if(wild){
+            Location location = randomNotInClaim(player, 0);
+
+            if(location != null){
+                for(int y = 254; y > -1; y--){
+                    Block block = player.getWorld().getBlockAt((int)location.getX(), y, (int)location.getZ());
+                    Block blockAbove = player.getWorld().getBlockAt((int)location.getX(), y+1, (int)location.getZ());
+
+                    if(nogoBlocks.contains(block.getType())){
+                        if(attempts < 5){
+                            wild(player, attempts+1);
+                        }else{
+                            player.sendMessage("§cCould not find a safe place to teleport, try again.");
+                        }
+                        break;
+                    }
+
+                    if(!transparentBlocks.contains(block.getType()) && transparentBlocks.contains(blockAbove.getType())){
+                        location.setY(y+1);
+                        teleport(player, location, "Wilderness");
+                        break;
+                    }
+
+                    if(y == 0){
+                        if(attempts < 5){
+                            wild(player, attempts+1);
+                        }else{
+                            player.sendMessage("§cCould not find a safe place to teleport, try again.");
+                        }
+                        break;
+                    }
+                }
+            }else{
+                player.sendMessage("§cCould not find a wilderness location, try again.");
+            }
+        }else{
+            player.sendMessage("§cWild teleport is not allowed in this server.");
+        }
+    }
+
     private void back(Player player){
         if(lastTeleport.containsKey(player)){
             teleport(player, lastTeleport.get(player), "Back");
 
         }else{
             player.sendMessage("§cYou have no where to go back to.");
+        }
+    }
+
+    private Location randomNotInClaim(Player player, int attempts){
+        int x = (int) (Math.random()*(wildRadius*2))-wildRadius;
+        int z = (int) (Math.random()*(wildRadius*2))-wildRadius;
+
+        Location location = new Location(player.getWorld(), x, 0, z);
+        String claim = inClaim(location.getChunk());
+
+        if(claim == null){
+            return location;
+        }else if(attempts < 5){
+            return randomNotInClaim(player, attempts+1);
+        }else{
+            return null;
         }
     }
 }
