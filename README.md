@@ -31,6 +31,13 @@ Commands
 - /f rename    Rename your faction
 - /f chat      Chat with all users in faction
 - /f map       Shows visual representation of chunks owned by factions
+- /f claim safezone     Claim land for safe zone
+- /f unclaim safezone   Unclaim land for safe zone
+- /f claim pvpzone     Claim land for pvp zone
+- /f unclaim pvpzone   Unclaim land for pvp zone
+- /f chown     Change faction ownership
+- /f setpower  Set faction power
+- /f rank      Get your rank in faction
 - /f version   Version of factions
 
 Extra Commands
@@ -46,11 +53,8 @@ Extra Commands
 - /tpa        Teleport request to player
 - /tpaa       Teleport accept player
 - /tpad       Deny teleport for player
+- /wild       Teleport to a random location that isn't owned by a faction
 - /back       Go back to last location teleported
-
-Todo commands
------------
-- /f rank     Get your rank in faction
 
 License
 -----------
