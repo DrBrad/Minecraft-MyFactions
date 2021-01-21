@@ -250,14 +250,18 @@ public class Main extends JavaPlugin implements Listener {
                     Player player = Bukkit.getPlayer(UUID.fromString(playerUUID));
 
                     if(player != null && player.isOnline()){
-                        player.sendMessage("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: §a"+event.getMessage());
+                        int rank = getPlayerRank(event.getPlayer().getUniqueId(), factionName);
+                        String[] names = { "Member", "Recruit", "Admin", "Owner" };
+                        player.sendMessage("§6[§c"+factionName+"§6][§c"+names[rank]+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: §a"+event.getMessage());
                     }
                 }
 
                 event.setCancelled(true);
 
             }else{
-                event.setFormat("§6[§c"+factionName+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
+                int rank = getPlayerRank(event.getPlayer().getUniqueId(), factionName);
+                String[] names = { "Member", "Recruit", "Admin", "Owner" };
+                event.setFormat("§6[§c"+factionName+"§6][§c"+names[rank]+"§6][§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
             }
         }else{
             event.setFormat("§6[§c"+event.getPlayer().getDisplayName()+"§6]§7: "+event.getMessage());
