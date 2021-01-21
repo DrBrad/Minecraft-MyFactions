@@ -37,6 +37,7 @@ public class Main extends JavaPlugin implements Listener {
     public static ArrayList<Player> factionChat = new ArrayList<>();
     public static HashMap<Player, Location> lastTeleport = new HashMap<>();
     public static HashMap<Player, Player> playerTeleport = new HashMap<>();
+    public static HashMap<Player, AutoClaim> autoClaimList = new HashMap<>();
 
     @Override
     public void onEnable(){
@@ -212,6 +213,10 @@ public class Main extends JavaPlugin implements Listener {
         if(mappedChunks.containsKey(event.getPlayer())){
             mappedChunks.remove(event.getPlayer());
         }
+
+        if(autoClaimList.containsKey(event.getPlayer())){
+            autoClaimList.remove(event.getPlayer());
+        }
     }
 
     @EventHandler
@@ -264,6 +269,9 @@ public class Main extends JavaPlugin implements Listener {
         String factionName = getFaction(event.getEntity().getUniqueId());
         if(factionName != null){
             setFactionPower(factionName, getFactionPower(factionName)-playerDeathCost);
+        }
+        if(autoClaimList.containsKey(event.getEntity())){
+            autoClaimList.remove(event.getEntity());
         }
     }
 
@@ -406,6 +414,10 @@ public class Main extends JavaPlugin implements Listener {
             }
         }
 
+        if(autoClaimList.containsKey(event.getPlayer())){
+            autoClaim(event.getPlayer());
+        }
+
         String claim = inClaim(event.getPlayer().getLocation().getChunk());
         String claimText;
         if(claim != null && (claim.equals("Safe-Zone") || claim.equals(getFaction(event.getPlayer().getUniqueId())))){
@@ -431,6 +443,154 @@ public class Main extends JavaPlugin implements Listener {
 
         if(mapFactions.contains(event.getPlayer())){
             viewClaims(event.getPlayer(), event.getPlayer().getLocation().getChunk());
+        }
+    }
+
+    public void autoClaim(Player player){
+        AutoClaim autoClaim = autoClaimList.get(player);
+        if(!player.getLocation().getChunk().getBlock(0, 0, 0).getLocation().equals(autoClaim.getLocation())){
+            String claim = inClaim(player.getLocation().getChunk());
+
+            if(autoClaim.getFactionName().equals("Safe-Zone")){
+                if(player.isOp()){
+                    if(autoClaim.isClaiming()){
+                        if(claim != null){
+                            if(claim.equalsIgnoreCase("Safe-Zone")){
+                                return;
+                            }else if(claim.equalsIgnoreCase("Pvp-Zone")){
+                                unclaimPvpZone(player.getLocation().getChunk());
+                            }else{
+                                unclaimForFaction(claim, player.getLocation().getChunk(), getFactionPower(claim));
+                            }
+                        }
+
+                        if(claimSafeZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have claimed this chunk as a §aSafe-Zone§7!");
+                            autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to claim chunk as Safe-Zone.");
+                        }
+
+                    }else if(claim != null && claim.equalsIgnoreCase("Safe-Zone")){
+                        if(unclaimSafeZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have unclaimed §aSafe-Zone§7 chunk!");
+                            autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to unclaim Safe-Zone chunk.");
+                        }
+                    }
+                }else{
+                    autoClaimList.remove(player);
+                    player.sendMessage("§cOnly server admins can auto unclaim Safe-Zone, turning off auto claim.");
+                }
+
+            }else if(autoClaim.getFactionName().equals("Pvp-Zone")){
+                if(player.isOp()){
+                    if(autoClaim.isClaiming()){
+                        if(claim != null){
+                            if(claim.equalsIgnoreCase("Pvp-Zone")){
+                                return;
+                            }else if(claim.equalsIgnoreCase("Safe-Zone")){
+                                unclaimPvpZone(player.getLocation().getChunk());
+                            }else{
+                                unclaimForFaction(claim, player.getLocation().getChunk(), getFactionPower(claim));
+                            }
+                        }
+
+                        if(claimPvpZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have claimed this chunk as a §aPvp-Zone§7!");
+                            autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to claim chunk as Pvp-Zone.");
+                        }
+
+                    }else if(claim != null && claim.equalsIgnoreCase("Pvp-Zone")){
+                        if(unclaimPvpZone(player.getLocation().getChunk())){
+                            player.sendMessage("§7You have unclaimed §aPvp-Zone§7 chunk!");
+                            autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                            if(mappedChunks.containsKey(player)){
+                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                viewClaims(player, player.getLocation().getChunk());
+                            }
+                        }else{
+                            player.sendMessage("§cFailed to unclaim Pvp-Zone chunk.");
+                        }
+                    }
+                }else{
+                    autoClaimList.remove(player);
+                    player.sendMessage("§cOnly server admins can auto unclaim SaPvp-Zone, turning off auto claim.");
+                }
+
+            }else{
+                String factionName = getFaction(player.getUniqueId());
+                if(factionName != null){
+                    if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                        if(getPlayerRank(player.getUniqueId(), factionName) > 1){
+                            if(factionName.equals(autoClaim.getFactionName())){
+                                if(claim == null && autoClaim.isClaiming()){
+                                    int power = getFactionPower(factionName);
+                                    if(power > claimPower-1){
+                                        if(claimForFaction(factionName, player.getLocation().getChunk(), power)){
+                                            player.sendMessage("§7You have claimed this chunk!");
+                                            autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                                            if(mappedChunks.containsKey(player)){
+                                                mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                                viewClaims(player, player.getLocation().getChunk());
+                                            }
+                                        }else{
+                                            player.sendMessage("§cFailed to claim chunk.");
+                                        }
+                                    }else{
+                                        autoClaimList.remove(player);
+                                        player.sendMessage("§cYour faction doesn't have enough power, turning off auto claim.");
+                                    }
+                                }else if(claim.equals(factionName) && !autoClaim.isClaiming()){
+                                    if(unclaimForFaction(factionName, player.getLocation().getChunk(), getFactionPower(factionName))){
+                                        player.sendMessage("§7You have unclaimed this chunk!");
+                                        autoClaim.setLocation(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+
+                                        if(mappedChunks.containsKey(player)){
+                                            mappedChunks.get(player).remove(player.getLocation().getChunk().getBlock(0, 0, 0).getLocation());
+                                            viewClaims(player, player.getLocation().getChunk());
+                                        }
+                                    }else{
+                                        player.sendMessage("§cFailed to unclaim chunk.");
+                                    }
+                                }
+                            }else{
+                                autoClaimList.remove(player);
+                                player.sendMessage("§cFaction name mismatch, turning off auto claim.");
+                            }
+                        }else{
+                            autoClaimList.remove(player);
+                            player.sendMessage("§cYour not a high enough rank in your faction to auto claim, turning off auto claim.");
+                        }
+                    }else{
+                        autoClaimList.remove(player);
+                        player.sendMessage("§cYour not a high enough rank in your faction to auto claim, turning off auto claim.");
+                    }
+                }else{
+                    autoClaimList.remove(player);
+                    player.sendMessage("§cYour not a part of a faction, turning off auto claim.");
+                }
+            }
         }
     }
 

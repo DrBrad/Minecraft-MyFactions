@@ -491,7 +491,7 @@ public class Faction {
 
                 in.close();
 
-                if(builder.contains(chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ())){
+                if(builder.contains("\""+chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ()+"\"")){
                     return true;
                 }
 
@@ -586,7 +586,7 @@ public class Faction {
 
                 in.close();
 
-                if(builder.contains(chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ())){
+                if(builder.contains("\""+chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ()+"\"")){
                     return true;
                 }
 
@@ -664,10 +664,10 @@ public class Faction {
     //PERFECT
     public static boolean claimPvpZone(Chunk chunk){
         try{
-            File safeZone = new File(plugin.getDataFolder()+File.separator+"pvp-zones.json");
+            File pvpZone = new File(plugin.getDataFolder()+File.separator+"pvp-zones.json");
             JSONArray json;
-            if(safeZone.exists()){
-                InputStream in = new FileInputStream(safeZone);
+            if(pvpZone.exists()){
+                InputStream in = new FileInputStream(pvpZone);
 
                 String builder = "";
                 byte[] buffer = new byte[4096];
@@ -678,7 +678,7 @@ public class Faction {
 
                 in.close();
 
-                if(builder.contains(chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ())){
+                if(builder.contains("\""+chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ()+"\"")){
                     return true;
                 }
 
@@ -690,7 +690,7 @@ public class Faction {
 
             json.put(chunk.getWorld().getName()+"|"+chunk.getX()+"|"+chunk.getZ());
 
-            OutputStream out = new FileOutputStream(safeZone);
+            OutputStream out = new FileOutputStream(pvpZone);
             out.write(json.toString().getBytes());
             out.flush();
             out.close();

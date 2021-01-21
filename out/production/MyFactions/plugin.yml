@@ -7,29 +7,203 @@ api-version: 1.16
 commands:
   f:
     description: Factions commands
+  f help:
+    description: List of faction commands
+    usage: |
+      /f help
+  f ?:
+    description: List of faction commands
+    usage: |
+      /f ?
+  f create:
+    description: Creates a faction.
+    usage: |
+      /f create FACTION_NAME
+  f invite:
+    description: Invites player to faction.
+    usage: |
+      /f invite PLAYER_NAME
+  f join:
+    description: Join faction from invite.
+    usage: |
+      /f join
+  f leave:
+    description: Leave your faction.
+    usage: |
+      /f leave
+  f remove:
+    description: Remove player from your faction.
+    usage: |
+      /f remove PLAYER_NAME
+  f promote:
+    description: Promote player in faction.
+    usage: |
+      /f promote PLAYER_NAME
+  f demote:
+    description: Demote player in faction.
+    usage: |
+      /f demote PLAYER_NAME
+  f disband:
+    description: Deletes your faction.
+    usage: |
+      /f disband
+  f claim:
+    description: Claim a chunk for your faction.
+    usage: |
+      /f claim
+  f unclaim:
+    description: Removes claim from your faction.
+    usage: |
+      /f unclaim
+  f autoclaim:
+    description: Automatically claim a chunk for your faction.
+    usage: |
+      /f autclaim
+  f autounclaim:
+    description: Automatically removes claim from your faction.
+    usage: |
+      /f autounclaim
+  f home:
+    description: Teleport to your factions home.
+    usage: |
+      /f home
+  f sethome:
+    description: Set your factions home.
+    usage: |
+      /f sethome
+  f warp:
+    description: Teleport to one of your factions warps.
+    usage: |
+      /f warp WARP_NAME
+  f warps:
+    description: Lists all warps for your faction.
+    usage: |
+      /f warps
+  f setwarp:
+    description: Set a warp for your faction.
+    usage: |
+      /f setwarp WARP_NAME
+  f delwarp:
+    description: Removes a warp from your faction.
+    usage: |
+      /f delwarp WARP_NAME
+  f power:
+    description: Check yours or another factions power.
+    usage: |
+      /f power
+  f list:
+    description: List of all of the factions.
+    usage: |
+      /f list
+  f rename:
+    description: Rename your faction something else.
+    usage: |
+      /f rename FACTION_NAME
+  f chat:
+    description: Chat with only faction members or globally.
+    usage: |
+      /f chat
+  f map:
+    description: See all faction claims chunks visually.
+    usage: |
+      /f map
+  f rank:
+    description: Get your rank in faction.
+    usage: |
+      /f rank
+  f chown:
+    description: Change faction ownership.
+    usage: |
+      /f chown PLAYER_NAME
+  f setpower:
+    description: Set factions power.
+    usage: |
+      /f setpower FACTION_NAME POWER_LEVEL
+  f claim safezone:
+    description: Claim Safe-Zone for server.
+    usage: |
+      /f claim safezone
+  f unclaim safezone:
+    description: Unclaim Safe-Zone for server.
+    usage: |
+      /f unclaim safezone
+  f autoclaim safezone:
+    description: Automatically claims safezone.
+    usage: |
+      /f autclaim safezone
+  f autounclaim safezone:
+    description: Automatically removes safezone claims.
+    usage: |
+      /f autounclaim safezone
+  f claim pvpzone:
+    description: Claim Pvp-Zone for server.
+    usage: |
+      /f claim pvpzone
+  f unclaim pvpzone:
+    description: Unclaim Pvp-Zone for server.
+    usage: |
+      /f unclaim pvpzone
+  f autoclaim pvpzone:
+    description: Automatically claims pvpzone.
+    usage: |
+      /f autclaim pvpzone
+  f autounclaim pvpzone:
+    description: Automatically removes pvpzone claims.
+    usage: |
+      /f autounclaim pvpzone
+  f version:
+    description: Get the version of this plugin.
+    usage: |
+      /f version
   warp:
-    description: Warp to a location
+    description: Warp to a location.
+    usage: |
+      /warp WARP_NAME
   warps:
-    description: List of warps
+    description: List of server warps.
+    usage: |
+      /warps
   setwarp:
-    description: Set warp location
+    description: Set server warp location.
+    usage: |
+      /setwarp WARP_NAME
   delwarp:
-    description: Remove warp location
+    description: Delete a server warp.
+    usage: |
+      /delwarp WARP_NAME
   home:
-    description: Teleport players home
+    description: Teleport to your home.
+    usage: |
+      /home
   sethome:
-    description: Set players home
+    description: Set your home.
+    usage: |
+      /sethome
   spawn:
-    description: Teleport player to spawn
+    description: Teleport to server spawn.
+    usage: |
+      /spawn
   setspawn:
-    description: Set worlds spawn
+    description: Set server spawn.
+    usage: |
+      /setspawn
   tpa:
-    description: Teleport to player
+    description: Teleport to player.
+    usage: |
+      /tpa PLAYER_NAME
   tpaa:
-    description: Accept player teleport
+    description: Accept players teleport request.
+    usage: |
+      /tpaa
   tpad:
-    description: Deny player teleport
+    description: Deny players teleport request.
+    usage: |
+      /tpad
   wild:
-    description: Teleport randomly in the wild
+    description: Teleport randomly in the wild to land unclaimed.
+    usage: |
+      /wild
   back:
-    description: Teleport back to previous location
+    description: Teleport back to previous location.
+    usage: |
+      /back

@@ -23,63 +23,50 @@ public class EssentialCommands  implements CommandExecutor {
         if(commandSender instanceof Player){
             switch(command.getName()){
                 case "warps":
-                    listWarps(((Player) commandSender));
-                    break;
+                    return listWarps(((Player) commandSender));
 
                 case "warp":
-                    warp(((Player) commandSender), args);
-                    break;
+                    return warp(((Player) commandSender), args);
 
                 case "setwarp":
-                    setWarp(((Player) commandSender), args);
-                    break;
+                    return setWarp(((Player) commandSender), args);
 
                 case "delwarp":
-                    removeWarp(((Player) commandSender), args);
-                    break;
+                    return removeWarp(((Player) commandSender), args);
 
                 case "home":
-                    home(((Player) commandSender));
-                    break;
+                    return home(((Player) commandSender));
 
                 case "sethome":
-                    setHome(((Player) commandSender));
-                    break;
+                    return setHome(((Player) commandSender));
 
                 case "spawn":
-                    spawn(((Player) commandSender));
-                    break;
+                    return spawn(((Player) commandSender));
 
                 case "setspawn":
-                    setSpawn(((Player) commandSender));
-                    break;
+                    return setSpawn(((Player) commandSender));
 
                 case "tpaa":
-                    tpaa(((Player) commandSender));
-                    break;
+                    return tpaa(((Player) commandSender));
 
                 case "tpad":
-                    tpad(((Player) commandSender));
-                    break;
+                    return tpad(((Player) commandSender));
 
                 case "tpa":
-                    tpa(((Player) commandSender), args);
-                    break;
+                    return tpa(((Player) commandSender), args);
 
                 case "wild":
-                    wild(((Player) commandSender), 0);
-                    break;
+                    return wild(((Player) commandSender), 0);
 
                 case "back":
-                    back(((Player) commandSender));
-                    break;
+                    return back(((Player) commandSender));
             }
         }
 
         return false;
     }
 
-    private void warp(Player player, String[] args){
+    private boolean warp(Player player, String[] args){
         if(args.length > 0){
             String warpName = args[0];
 
@@ -93,12 +80,14 @@ public class EssentialCommands  implements CommandExecutor {
             }else{
                 player.sendMessage("§cThe warp specified doesn't exist");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a warp you wish to go to.");
         }
+        return false;
     }
 
-    private void listWarps(Player player){
+    private boolean listWarps(Player player){
         File warps = new File(plugin.getDataFolder()+File.separator+"warps");
         if(warps.exists() && warps.listFiles().length > 0){
             String builder = "";
@@ -111,9 +100,10 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cTheir doesn't seem to be any warps.");
         }
+        return true;
     }
 
-    private void setWarp(Player player, String[] args){
+    private boolean setWarp(Player player, String[] args){
         if(player.isOp()){
             if(args.length > 0){
                 String warpName = args[0];
@@ -143,15 +133,18 @@ public class EssentialCommands  implements CommandExecutor {
                 }else{
                     player.sendMessage("§cThe name exceeds character requirements.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
+                return false;
             }
         }else{
             player.sendMessage("§cOnly server admins can set warps.");
         }
+        return true;
     }
 
-    private void removeWarp(Player player, String[] args){
+    private boolean removeWarp(Player player, String[] args){
         if(player.isOp()){
             if(args.length > 0){
                 String warpName = args[0];
@@ -170,15 +163,17 @@ public class EssentialCommands  implements CommandExecutor {
                 }else{
                     player.sendMessage("§cThe name exceeds character requirements.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cOnly server admins can remove warps.");
         }
+        return false;
     }
 
-    private void home(Player player){
+    private boolean home(Player player){
         File home = new File(plugin.getDataFolder()+File.separator+"homes"+File.separator+player.getUniqueId().toString()+".yml");
         if(home.exists()){
             FileConfiguration config = YamlConfiguration.loadConfiguration(home);
@@ -189,9 +184,10 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cYou don't seem to have a home set.");
         }
+        return true;
     }
 
-    private void setHome(Player player){
+    private boolean setHome(Player player){
         try{
             File homes = new File(plugin.getDataFolder()+File.separator+"homes");
             if(!homes.exists()){
@@ -214,9 +210,10 @@ public class EssentialCommands  implements CommandExecutor {
             e.printStackTrace();
             player.sendMessage("§cError setting home.");
         }
+        return true;
     }
 
-    private void spawn(Player player){
+    private boolean spawn(Player player){
         File spawn = new File(plugin.getDataFolder()+File.separator+"spawn.yml");
         if(spawn.exists()){
             FileConfiguration config = YamlConfiguration.loadConfiguration(spawn);
@@ -227,9 +224,10 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cTheir doesn't seem to be a spawn set.");
         }
+        return true;
     }
 
-    private void setSpawn(Player player){
+    private boolean setSpawn(Player player){
         if(player.isOp()){
             try{
                 File spawn = new File(plugin.getDataFolder()+File.separator+"spawn.yml");
@@ -249,11 +247,12 @@ public class EssentialCommands  implements CommandExecutor {
                 player.sendMessage("§cError setting home.");
             }
         }else{
-
+            player.sendMessage("§cOnly server admins can set spawn.");
         }
+        return true;
     }
 
-    private void tpa(Player player, String[] args){
+    private boolean tpa(Player player, String[] args){
         if(args.length > 0){
             Player reqPlayer = plugin.getServer().getPlayer(args[0]);
             if(reqPlayer != null && reqPlayer.isOnline()){
@@ -279,12 +278,14 @@ public class EssentialCommands  implements CommandExecutor {
             }else{
                 player.sendMessage("§cThe player you are inviting doesn't exist or is not §aonline§c.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to teleport to.");
         }
+        return false;
     }
 
-    private void tpaa(Player player){
+    private boolean tpaa(Player player){
         if(playerTeleport.containsKey(player)){
             Player reqPlayer = playerTeleport.get(player);
 
@@ -299,9 +300,10 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cYou have no tp requests.");
         }
+        return true;
     }
 
-    private void tpad(Player player){
+    private boolean tpad(Player player){
         if(playerTeleport.containsKey(player)){
             Player reqPlayer = playerTeleport.get(player);
             player.sendMessage("§7You have denied teleport for §c"+reqPlayer.getDisplayName()+"§7.");
@@ -311,9 +313,10 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cYou have no tp requests.");
         }
+        return true;
     }
 
-    private void wild(Player player, int attempts){
+    private boolean wild(Player player, int attempts){
         if(wild){
             Location location = randomNotInClaim(player, 0);
 
@@ -352,15 +355,17 @@ public class EssentialCommands  implements CommandExecutor {
         }else{
             player.sendMessage("§cWild teleport is not allowed in this server.");
         }
+        return true;
     }
 
-    private void back(Player player){
+    private boolean back(Player player){
         if(lastTeleport.containsKey(player)){
             teleport(player, lastTeleport.get(player), "Back");
 
         }else{
             player.sendMessage("§cYou have no where to go back to.");
         }
+        return true;
     }
 
     private Location randomNotInClaim(Player player, int attempts){
