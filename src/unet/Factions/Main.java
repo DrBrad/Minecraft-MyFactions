@@ -115,7 +115,11 @@ public class Main extends JavaPlugin implements Listener {
                 Material.JUNGLE_TRAPDOOR,
                 Material.OAK_TRAPDOOR,
                 Material.SPRUCE_TRAPDOOR,
-                Material.WARPED_TRAPDOOR
+                Material.WARPED_TRAPDOOR,
+                Material.ITEM_FRAME,
+                Material.ARMOR_STAND,
+                Material.WATER,
+                Material.LAVA
         };
 
         Collections.addAll(noeditting, noedit);

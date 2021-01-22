@@ -96,7 +96,7 @@ public class EssentialCommands  implements CommandExecutor {
             }
             builder = builder.substring(0, builder.length()-2);
 
-            player.sendMessage("§Server warps: "+builder+".");
+            player.sendMessage("§7Server warps: "+builder+".");
         }else{
             player.sendMessage("§cTheir doesn't seem to be any warps.");
         }
