@@ -1,38 +1,47 @@
 package unet.Factions;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import unet.Factions.Faction.MyFaction;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import static unet.Factions.Config.*;
-import static unet.Factions.Handlers.*;
-import static unet.Factions.Main.*;
-import static unet.Factions.Faction.*;
+import static unet.Factions.Claim.ClaimHandler.*;
+import static unet.Factions.Faction.FactionHandler.*;
+import static unet.Factions.Handlers.BlockHandler.*;
+import static unet.Factions.Handlers.Colors.*;
+import static unet.Factions.Handlers.GeneralHandler.*;
+import static unet.Factions.Handlers.Config.*;
+import static unet.Factions.Main.plugin;
 
-public class EssentialCommands  implements CommandExecutor {
+public class EssentialCommands implements CommandExecutor, TabExecutor {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args){
         if(commandSender instanceof Player){
             switch(command.getName()){
                 case "warps":
-                    return listWarps(((Player) commandSender));
+                    return warps(((Player) commandSender), args);
 
                 case "warp":
                     return warp(((Player) commandSender), args);
 
                 case "setwarp":
-                    return setWarp(((Player) commandSender), args);
+                    return setWarpCMD(((Player) commandSender), args);
 
                 case "delwarp":
-                    return removeWarp(((Player) commandSender), args);
+                    return removeWarpCMD(((Player) commandSender), args);
 
                 case "home":
                     return home(((Player) commandSender));
@@ -44,7 +53,7 @@ public class EssentialCommands  implements CommandExecutor {
                     return spawn(((Player) commandSender));
 
                 case "setspawn":
-                    return setSpawn(((Player) commandSender));
+                    return setSpawnCMD(((Player) commandSender));
 
                 case "tpaa":
                     return tpaa(((Player) commandSender));
@@ -56,7 +65,7 @@ public class EssentialCommands  implements CommandExecutor {
                     return tpa(((Player) commandSender), args);
 
                 case "wild":
-                    return wild(((Player) commandSender), 0);
+                    return wild(((Player) commandSender));
 
                 case "back":
                     return back(((Player) commandSender));
@@ -66,186 +75,238 @@ public class EssentialCommands  implements CommandExecutor {
         return false;
     }
 
-    private boolean warp(Player player, String[] args){
-        if(args.length > 0){
-            String warpName = args[0];
-
-            File warp = new File(plugin.getDataFolder()+File.separator+"warps"+File.separator+warpName+".yml");
-            if(warp.exists()){
-                FileConfiguration config = YamlConfiguration.loadConfiguration(warp);
-
-                teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                        config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), warpName);
-
-            }else{
-                player.sendMessage("§cThe warp specified doesn't exist");
-            }
-            return true;
-        }else{
-            player.sendMessage("§cPlease specify a warp you wish to go to.");
-        }
-        return false;
-    }
-
-    private boolean listWarps(Player player){
-        File warps = new File(plugin.getDataFolder()+File.separator+"warps");
-        if(warps.exists() && warps.listFiles().length > 0){
-            String builder = "";
-            for(File warp : warps.listFiles()){
-                builder += "§c"+warp.getName().substring(0, warp.getName().length()-4)+"§7, ";
-            }
-            builder = builder.substring(0, builder.length()-2);
-
-            player.sendMessage("§7Server warps: "+builder+".");
-        }else{
-            player.sendMessage("§cTheir doesn't seem to be any warps.");
-        }
-        return true;
-    }
-
-    private boolean setWarp(Player player, String[] args){
-        if(player.isOp()){
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args){
+        if(commandSender instanceof Player){
             if(args.length > 0){
-                String warpName = args[0];
-                if(warpName.length() < 13 && warpName.length() > 1){
-                    try{
-                        File warps = new File(plugin.getDataFolder()+File.separator+"warps");
-                        if(!warps.exists()){
-                            warps.mkdirs();
-                        }
+                String cmd = args[0].toLowerCase();
+                ArrayList<String> tabComplete = new ArrayList<>();
 
-                        File warp = new File(warps.getPath()+File.separator+warpName+".yml");
-                        FileConfiguration config = YamlConfiguration.loadConfiguration(warp);
-                        config.set("world", player.getLocation().getWorld().getName());
-                        config.set("x", player.getLocation().getX());
-                        config.set("y", player.getLocation().getY());
-                        config.set("z", player.getLocation().getZ());
-                        config.set("yaw", player.getLocation().getYaw());
-                        config.set("pitch", player.getLocation().getPitch());
-                        config.save(warp);
+                if(args.length > 1){
+                    switch(cmd){
+                        case "warp":
+                            tabComplete.addAll(getWarps());
+                            break;
 
-                        player.sendMessage("§7You have set the warp §c"+warpName+"§7.");
+                        case "setwarp":
+                            tabComplete.addAll(getWarps());
+                            break;
 
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        player.sendMessage("§cError setting warp.");
+                        case "delwarp":
+                            tabComplete.addAll(getWarps());
+                            break;
+
+                        case "tpa":
+                            for(Player player : Bukkit.getOnlinePlayers()){
+                                tabComplete.add(player.getName());
+                            }
+                            break;
                     }
                 }else{
-                    player.sendMessage("§cThe name exceeds character requirements.");
+                    tabComplete.add("warps");
+                    tabComplete.add("warp");
+                    tabComplete.add("setwarp");
+                    tabComplete.add("delwarp");
+                    tabComplete.add("home");
+                    tabComplete.add("sethome");
+                    tabComplete.add("spawn");
+                    tabComplete.add("setspawn");
+                    tabComplete.add("tpa");
+                    tabComplete.add("tpaa");
+                    tabComplete.add("tpad");
+                    tabComplete.add("wild");
+                    tabComplete.add("back");
                 }
-                return true;
-            }else{
-                player.sendMessage("§cPlease specify a warp name.");
-                return false;
-            }
-        }else{
-            player.sendMessage("§cOnly server admins can set warps.");
-        }
-        return true;
-    }
 
-    private boolean removeWarp(Player player, String[] args){
-        if(player.isOp()){
-            if(args.length > 0){
-                String warpName = args[0];
-                if(warpName.length() < 13 && warpName.length() > 1){
-                    try{
-                        File warp = new File(plugin.getDataFolder()+File.separator+"warps"+File.separator+warpName+".yml");
-                        if(warp.exists()){
-                            warp.delete();
-                        }
-
-                        player.sendMessage("§7You have removed the warp §c"+warpName+"§7.");
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        player.sendMessage("§cError removing warp.");
-                    }
-                }else{
-                    player.sendMessage("§cThe name exceeds character requirements.");
-                }
-                return true;
-            }else{
-                player.sendMessage("§cPlease specify a warp name.");
+                return tabComplete;
             }
-        }else{
-            player.sendMessage("§cOnly server admins can remove warps.");
         }
-        return false;
+
+        return null;
     }
 
     private boolean home(Player player){
-        File home = new File(plugin.getDataFolder()+File.separator+"homes"+File.separator+player.getUniqueId().toString()+".yml");
-        if(home.exists()){
-            FileConfiguration config = YamlConfiguration.loadConfiguration(home);
+        if(isHomeTeleport()){
+            File home = new File(plugin.getDataFolder()+File.separator+"homes"+File.separator+player.getUniqueId().toString()+".yml");
+            if(home.exists()){
+                FileConfiguration config = YamlConfiguration.loadConfiguration(home);
 
-            teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                    config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), "Home");
+                MyFaction faction = getPlayersFaction(player.getUniqueId());
+                if(faction != null){
+                    teleport(player,
+                            new Location(plugin.getServer().getWorld(config.getString("world")),
+                                    config.getDouble("x"),
+                                    config.getDouble("y"),
+                                    config.getDouble("z"),
+                                    (float)config.getDouble("yaw"),
+                                    (float)config.getDouble("pitch")),
+                            "Home",
+                            getColorRGB(faction.getColor()));
 
+                }else{
+                    teleport(player,
+                            new Location(plugin.getServer().getWorld(config.getString("world")),
+                                    config.getDouble("x"),
+                                    config.getDouble("y"),
+                                    config.getDouble("z"),
+                                    (float)config.getDouble("yaw"),
+                                    (float)config.getDouble("pitch")),
+                            "Home",
+                            getColorRGB(5));
+                }
+
+            }else{
+                player.sendMessage("§cYou don't seem to have a home set.");
+            }
         }else{
-            player.sendMessage("§cYou don't seem to have a home set.");
+            player.sendMessage("§cServer has player homes disabled.");
         }
         return true;
     }
 
     private boolean setHome(Player player){
-        try{
-            File homes = new File(plugin.getDataFolder()+File.separator+"homes");
-            if(!homes.exists()){
-                homes.mkdirs();
-            }
-
-            File warp = new File(homes.getPath()+File.separator+player.getUniqueId().toString()+".yml");
-            FileConfiguration config = YamlConfiguration.loadConfiguration(warp);
-            config.set("world", player.getLocation().getWorld().getName());
-            config.set("x", player.getLocation().getX());
-            config.set("y", player.getLocation().getY());
-            config.set("z", player.getLocation().getZ());
-            config.set("yaw", player.getLocation().getYaw());
-            config.set("pitch", player.getLocation().getPitch());
-            config.save(warp);
-
-            player.sendMessage("§7You have set your home.");
-
-        }catch(Exception e){
-            e.printStackTrace();
-            player.sendMessage("§cError setting home.");
-        }
-        return true;
-    }
-
-    private boolean spawn(Player player){
-        File spawn = new File(plugin.getDataFolder()+File.separator+"spawn.yml");
-        if(spawn.exists()){
-            FileConfiguration config = YamlConfiguration.loadConfiguration(spawn);
-
-            teleport(player, new Location(plugin.getServer().getWorld(config.getString("world")), config.getDouble("x"),
-                    config.getDouble("y"), config.getDouble("z"), (float)config.getDouble("yaw"), (float)config.getDouble("pitch")), "Spawn");
-
-        }else{
-            player.sendMessage("§cTheir doesn't seem to be a spawn set.");
-        }
-        return true;
-    }
-
-    private boolean setSpawn(Player player){
-        if(player.isOp()){
+        if(isHomeTeleport()){
             try{
-                File spawn = new File(plugin.getDataFolder()+File.separator+"spawn.yml");
-                FileConfiguration config = YamlConfiguration.loadConfiguration(spawn);
+                File homes = new File(plugin.getDataFolder()+File.separator+"homes");
+                if(!homes.exists()){
+                    homes.mkdirs();
+                }
+
+                File warp = new File(homes.getPath()+File.separator+player.getUniqueId().toString()+".yml");
+                FileConfiguration config = YamlConfiguration.loadConfiguration(warp);
                 config.set("world", player.getLocation().getWorld().getName());
                 config.set("x", player.getLocation().getX());
                 config.set("y", player.getLocation().getY());
                 config.set("z", player.getLocation().getZ());
                 config.set("yaw", player.getLocation().getYaw());
                 config.set("pitch", player.getLocation().getPitch());
-                config.save(spawn);
+                config.save(warp);
 
-                player.sendMessage("§7You have set server spawn.");
+                player.sendMessage("§7You have set your home.");
 
             }catch(Exception e){
                 e.printStackTrace();
-                player.sendMessage("§cError setting home.");
+                player.sendMessage("§cError setting your home.");
             }
+        }else{
+            player.sendMessage("§cServer has player homes disabled.");
+        }
+        return true;
+    }
+
+    public boolean warp(Player player, String[] args){
+        if(args.length > 0){
+            String warpName = args[0];
+
+            if(isWarp(warpName)){
+                MyFaction faction = getPlayersFaction(player.getUniqueId());
+                if(faction != null){
+                    teleport(player, getWarp(warpName), "warp "+warpName, getColorRGB(faction.getColor()));
+
+                }else{
+                    teleport(player, getWarp(warpName), "warp "+warpName, getColorRGB(5));
+                }
+                return true;
+            }else{
+                player.sendMessage("§cThe warp specified doesn't exist.");
+            }
+        }else{
+            player.sendMessage("§cPlease specify a warp name.");
+        }
+        return false;
+    }
+
+    public boolean setWarpCMD(Player player, String[] args){
+        if(player.isOp()){
+            if(args.length > 0){
+
+                String warpName = args[0];
+                if(warpName.length() < 13 && warpName.length() > 1){
+                    if(!isWarp(warpName)){
+                        setWarp(warpName, player.getLocation());
+                        player.sendMessage("§7You have set the warp: §a"+warpName+"§7.");
+                        return true;
+                    }else{
+                        player.sendMessage("§cWarp already exists with this name.");
+                    }
+                }else{
+                    player.sendMessage("§cWarp name exceeds character requirements.");
+                }
+            }else{
+                player.sendMessage("§cPlease specify a warp name.");
+            }
+        }else{
+            player.sendMessage("§cOnly server admins can set server warps.");
+        }
+        return false;
+    }
+
+    public boolean removeWarpCMD(Player player, String[] args){
+        if(player.isOp()){
+            if(args.length > 0){
+                String warpName = args[0];
+                if(isWarp(warpName)){
+                    removeWarp(warpName);
+                    player.sendMessage("§7You have removed the warp: §a"+warpName+"§7.");
+                    return true;
+                }else{
+                    player.sendMessage("§cWarp specified doesn't exist.");
+                }
+            }else{
+                player.sendMessage("§cPlease specify a warp name.");
+            }
+        }else{
+            player.sendMessage("§cOnly server admins can remove server warps.");
+        }
+        return false;
+    }
+
+    public boolean warps(Player player, String[] args){
+        int page = 0;
+        if(args.length > 0){
+            page = Integer.parseInt(args[0]);
+        }
+
+        ArrayList<String> warps = getWarps();
+
+        if(warps != null && warps.size() > 0){
+            player.sendMessage("§c------- §fList of Warps (1/"+(((warps.size()/9)*page)+1)+") §c-------");
+
+            for(int i = page*9; i < (page+1)*9; i++){
+                if(i < warps.size()){
+                    Location warp = getWarp(warps.get(i));
+                    player.sendMessage("§c"+warps.get(i)+"§7: Warp is located in the world: §c"+warp.getWorld().getName()+"§7.");
+                }else{
+                    break;
+                }
+            }
+        }else{
+            player.sendMessage("§cServer has no warps.");
+        }
+        return true;
+    }
+
+    private boolean spawn(Player player){
+        Location spawn = getSpawn();
+        if(spawn != null){
+            MyFaction faction = getPlayersFaction(player.getUniqueId());
+            if(faction != null){
+                teleport(player, spawn, "Spawn", getColorRGB(faction.getColor()));
+
+            }else{
+                teleport(player, spawn, "Spawn", getColorRGB(5));
+            }
+            return true;
+        }else{
+            player.sendMessage("§cTheir doesn't seem to be a spawn set.");
+        }
+        return false;
+    }
+
+    private boolean setSpawnCMD(Player player){
+        if(player.isOp()){
+            setSpawn(player.getPlayer().getLocation());
+            player.sendMessage("§7You have set server spawn.");
         }else{
             player.sendMessage("§cOnly server admins can set spawn.");
         }
@@ -254,31 +315,34 @@ public class EssentialCommands  implements CommandExecutor {
 
     private boolean tpa(Player player, String[] args){
         if(args.length > 0){
-            Player reqPlayer = plugin.getServer().getPlayer(args[0]);
-            if(reqPlayer != null && reqPlayer.isOnline()){
-                if(reqPlayer != player){
-                    playerTeleport.put(reqPlayer, player);
+            Player receiver = Bukkit.getPlayer(args[0]);
 
-                    player.sendMessage("§7Teleport request sent to §c"+reqPlayer.getDisplayName()+"§7.");
-                    reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 wishes to teleport, please type §a/tpaa§7 to accept or §c/tpad§7to deny, this will expire in §c30s§7.");
+            if(receiver != null && receiver.isOnline()){
+                if(!receiver.getUniqueId().equals(player.getUniqueId())){
+                    setPlayerTeleport(player, receiver);
 
-                    plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+                    player.sendMessage("§7Teleport request sent to §c"+receiver.getDisplayName()+"§7.");
+                    receiver.sendMessage("§c"+player.getDisplayName()+"§7 wishes to teleport, please type §a/tpaa§7 to accept or §c/tpad§7to deny, this will expire in §c30s§7.");
+
+                    setPlayerTeleportTask(receiver, plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
                         @Override
                         public void run(){
-                            if(playerTeleport.containsKey(reqPlayer)){
-                                playerTeleport.remove(reqPlayer);
-                                //TELL USER THE SAME
-                                reqPlayer.sendMessage("§7Teleport request has expired!");
+                            if(hasPlayerTeleport(receiver)){
+                                removePlayerTeleport(receiver);
+                                removePlayerTeleportTask(receiver);
+                                player.sendMessage("§7Teleport request to §a"+receiver.getName()+"§7 has expired!");
+                                receiver.sendMessage("§a"+receiver.getName()+"§7 teleport request has expired!");
                             }
                         }
-                    }, 600);
+                    }, 600));
+
+                    return true;
                 }else{
-                    player.sendMessage("§cYou cannot teleport to yourself...");
+                    player.sendMessage("§cYou cannot teleport to yourself.");
                 }
             }else{
-                player.sendMessage("§cThe player you are inviting doesn't exist or is not §aonline§c.");
+                player.sendMessage("§cThe player specified doesn't exist or is not online.");
             }
-            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to teleport to.");
         }
@@ -286,14 +350,20 @@ public class EssentialCommands  implements CommandExecutor {
     }
 
     private boolean tpaa(Player player){
-        if(playerTeleport.containsKey(player)){
-            Player reqPlayer = playerTeleport.get(player);
+        if(hasPlayerTeleport(player)){
+            Player sender = getPlayerTeleport(player);
+            removePlayerTeleport(player);
 
-            if(reqPlayer.isOnline()){
-                player.sendMessage("§7You have accepted teleport for: §c"+reqPlayer.getDisplayName()+"§7.");
-                teleport(reqPlayer, player.getLocation(), player.getDisplayName());
-                playerTeleport.remove(player);
+            if(sender.isOnline()){
+                player.sendMessage("§7You have accepted teleport for: §c"+sender.getName()+"§7.");
 
+                MyFaction faction = getPlayersFaction(player.getUniqueId());
+                if(faction != null){
+                    teleport(sender, player.getLocation(), "Back", getColorRGB(faction.getColor()));
+
+                }else{
+                    teleport(sender, player.getLocation(), "Back", getColorRGB(5));
+                }
             }else{
                 player.sendMessage("§cPlayer is no longer online.");
             }
@@ -304,11 +374,14 @@ public class EssentialCommands  implements CommandExecutor {
     }
 
     private boolean tpad(Player player){
-        if(playerTeleport.containsKey(player)){
-            Player reqPlayer = playerTeleport.get(player);
-            player.sendMessage("§7You have denied teleport for §c"+reqPlayer.getDisplayName()+"§7.");
-            reqPlayer.sendMessage("§c"+player.getDisplayName()+"§7 has denied your teleport request.");
-            playerTeleport.remove(player);
+        if(hasPlayerTeleport(player)){
+            Player sender = getPlayerTeleport(player);
+            removePlayerTeleport(player);
+
+            if(sender.isOnline()){
+                sender.sendMessage("§c"+player.getName()+"§7 has denied your teleport request.");
+            }
+            player.sendMessage("§7You have denied teleport for §c"+sender.getName()+"§7.");
 
         }else{
             player.sendMessage("§cYou have no tp requests.");
@@ -316,71 +389,71 @@ public class EssentialCommands  implements CommandExecutor {
         return true;
     }
 
-    private boolean wild(Player player, int attempts){
-        if(wild){
-            Location location = randomNotInClaim(player, 0);
+    private boolean wild(Player player){
+        if(isWildTeleport()){
+            if(!isWildDelayed(player)){
+                Location location = null;
+                for(int i = 0; i < 6; i++){
+                    int x = (int) (Math.random()*(getWildRadius()*2))-getWildRadius();
+                    int z = (int) (Math.random()*(getWildRadius()*2))-getWildRadius();
 
-            if(location != null){
-                for(int y = 254; y > -1; y--){
-                    Block block = player.getWorld().getBlockAt((int)location.getX(), y, (int)location.getZ());
-                    Block blockAbove = player.getWorld().getBlockAt((int)location.getX(), y+1, (int)location.getZ());
-
-                    if(nogoBlocks.contains(block.getType())){
-                        if(attempts < 5){
-                            wild(player, attempts+1);
-                        }else{
-                            player.sendMessage("§cCould not find a safe place to teleport, try again.");
-                        }
-                        break;
-                    }
-
-                    if(!transparentBlocks.contains(block.getType()) && transparentBlocks.contains(blockAbove.getType())){
-                        location.setY(y+1);
-                        teleport(player, location, "Wilderness");
-                        break;
-                    }
-
-                    if(y == 0){
-                        if(attempts < 5){
-                            wild(player, attempts+1);
-                        }else{
-                            player.sendMessage("§cCould not find a safe place to teleport, try again.");
-                        }
+                    location = new Location(player.getWorld(), x, 0, z);
+                    if(!inClaim(location.getChunk())){
                         break;
                     }
                 }
+
+                if(inClaim(location.getChunk())){
+                    player.sendMessage("§cCouldn't find a location outside a claim, try again.");
+                    return false;
+                }
+
+                List<Material> dangerous = getDangerous();
+                Block block = location.getWorld().getHighestBlockAt(location.getBlockX(), location.getBlockZ());
+
+                if(dangerous.contains(block.getType()) || block.getY() < 0){
+                    player.sendMessage("§cCould not find a safe place to teleport, try again.");
+                    return false;
+                }
+
+                block = block.getWorld().getBlockAt(block.getX(), block.getY()+1, block.getZ());
+
+                setWildDelayed(player);
+
+                MyFaction faction = getPlayersFaction(player.getUniqueId());
+                if(faction != null){
+                    teleport(player, block.getLocation(), "Wild", getColorRGB(faction.getColor()));
+
+                }else{
+                    teleport(player, block.getLocation(), "Wild", getColorRGB(5));
+                }
             }else{
-                player.sendMessage("§cCould not find a wilderness location, try again.");
+                player.sendMessage("§cYou can only do /wild every "+(getWildDelay()/60000)+" minutes.");
             }
         }else{
-            player.sendMessage("§cWild teleport is not allowed in this server.");
+            player.sendMessage("§cServer has wild teleports disabled.");
         }
         return true;
     }
 
     private boolean back(Player player){
-        if(lastTeleport.containsKey(player)){
-            teleport(player, lastTeleport.get(player), "Back");
+        if(isBackTeleport()){
+            if(hasLastTeleport(player)){
+                Location location = getLastTeleport(player);
 
+                MyFaction faction = getPlayersFaction(player.getUniqueId());
+                if(faction != null){
+                    teleport(player, location, "Back", getColorRGB(faction.getColor()));
+
+                }else{
+                    teleport(player, location, "Back", getColorRGB(5));
+                }
+            }else{
+                player.sendMessage("§cYou have no where to go back to.");
+            }
         }else{
-            player.sendMessage("§cYou have no where to go back to.");
+            player.sendMessage("§cServer has back teleports disabled.");
         }
         return true;
-    }
-
-    private Location randomNotInClaim(Player player, int attempts){
-        int x = (int) (Math.random()*(wildRadius*2))-wildRadius;
-        int z = (int) (Math.random()*(wildRadius*2))-wildRadius;
-
-        Location location = new Location(player.getWorld(), x, 0, z);
-        String claim = inClaim(location.getChunk());
-
-        if(claim == null){
-            return location;
-        }else if(attempts < 5){
-            return randomNotInClaim(player, attempts+1);
-        }else{
-            return null;
-        }
     }
 }

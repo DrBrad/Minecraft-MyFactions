@@ -1,5 +1,5 @@
 name: MyFactions
-version: 1.1
+version: 2.0
 author: DrBrad
 main: unet.Factions.Main
 description: Im the best their is plain and simple, I mean I wake up and piss excellance
@@ -119,6 +119,10 @@ commands:
     description: Set factions power.
     usage: |
       /f setpower FACTION_NAME POWER_LEVEL
+  f setdesc:
+    description: Set factions description.
+    usage: |
+      /f setdesc FACTIONS DESCRIPTION
   f claim safezone:
     description: Claim Safe-Zone for server.
     usage: |
