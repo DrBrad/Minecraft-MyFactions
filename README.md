@@ -3,13 +3,17 @@ MyFactions
 
 This is a working version of factions plugin for Spigot Minecraft V1.16.4
 
+Spigot Link
+-----------
+https://www.spigotmc.org/resources/myfactions.88061/
+
 Donate
 -----------
 https://www.paypal.com/paypalme/TheAnarch
 
 Commands
 -----------
-- **/f** help      List of all commands
+- **/f help**      List of all commands
 - **/f ?**         List of all commands
 - **/f create**    Create a faction
 - **/f invite**    Invite player to faction
