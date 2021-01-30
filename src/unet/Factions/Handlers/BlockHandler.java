@@ -36,6 +36,8 @@ public class BlockHandler {
                 Material.CHEST_MINECART,
                 Material.HOPPER,
                 Material.HOPPER_MINECART,
+                Material.DROPPER,
+                Material.DISPENSER,
                 Material.TNT,
                 Material.TNT_MINECART,
                 Material.COMMAND_BLOCK,

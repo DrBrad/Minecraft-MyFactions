@@ -1,5 +1,5 @@
 name: MyFactions
-version: 2.0
+version: 2.1
 author: DrBrad
 main: unet.Factions.Main
 description: Im the best their is plain and simple, I mean I wake up and piss excellance
@@ -207,10 +207,18 @@ commands:
     description: Deny players teleport request.
     usage: |
       /tpad
+  msg:
+    description: Message another player in private.
+    usage: |
+      /msg PLAYER_NAME
   wild:
     description: Teleport randomly in the wild to land unclaimed.
     usage: |
       /wild
+  gamemode:
+    description: Change your gamemode
+    usage: |
+      /gamemode MODE
   back:
     description: Teleport back to previous location.
     usage: |

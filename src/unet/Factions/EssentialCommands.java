@@ -1,6 +1,7 @@
 package unet.Factions;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -61,11 +62,17 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                 case "tpad":
                     return tpad(((Player) commandSender));
 
+                case "msg":
+                    return msg(((Player) commandSender), args);
+
                 case "tpa":
                     return tpa(((Player) commandSender), args);
 
                 case "wild":
                     return wild(((Player) commandSender));
+
+                case "gamemode":
+                    return gamemode(((Player) commandSender), args);
 
                 case "back":
                     return back(((Player) commandSender));
@@ -78,48 +85,69 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args){
         if(commandSender instanceof Player){
+            String cmd = command.getName().toLowerCase();
+            ArrayList<String> tabComplete = new ArrayList<>();
+
             if(args.length > 0){
-                String cmd = args[0].toLowerCase();
-                ArrayList<String> tabComplete = new ArrayList<>();
+                switch(cmd){
+                    case "warp":
+                        tabComplete.addAll(getWarps());
+                        break;
 
-                if(args.length > 1){
-                    switch(cmd){
-                        case "warp":
-                            tabComplete.addAll(getWarps());
-                            break;
+                    case "setwarp":
+                        tabComplete.addAll(getWarps());
+                        break;
 
-                        case "setwarp":
-                            tabComplete.addAll(getWarps());
-                            break;
+                    case "delwarp":
+                        tabComplete.addAll(getWarps());
+                        break;
 
-                        case "delwarp":
-                            tabComplete.addAll(getWarps());
-                            break;
+                    case "tpa":
+                        for(Player player : Bukkit.getOnlinePlayers()){
+                            tabComplete.add(player.getName());
+                        }
+                        break;
 
-                        case "tpa":
+                    case "msg":
+                        if(args.length == 1){
                             for(Player player : Bukkit.getOnlinePlayers()){
                                 tabComplete.add(player.getName());
                             }
-                            break;
-                    }
-                }else{
-                    tabComplete.add("warps");
-                    tabComplete.add("warp");
-                    tabComplete.add("setwarp");
-                    tabComplete.add("delwarp");
-                    tabComplete.add("home");
-                    tabComplete.add("sethome");
-                    tabComplete.add("spawn");
-                    tabComplete.add("setspawn");
-                    tabComplete.add("tpa");
-                    tabComplete.add("tpaa");
-                    tabComplete.add("tpad");
-                    tabComplete.add("wild");
-                    tabComplete.add("back");
-                }
+                        }
+                        break;
 
-                return tabComplete;
+                    case "gamemode":
+                        if(args.length == 2){
+                            for(Player player : Bukkit.getOnlinePlayers()){
+                                tabComplete.add(player.getName());
+                            }
+                        }else if(args.length == 1){
+                            tabComplete.add("SURVIVAL");
+                            tabComplete.add("CREATIVE");
+                            tabComplete.add("ADVENTURE");
+                            tabComplete.add("SPECTATOR");
+                        }
+                        break;
+                }
+            }else{
+                tabComplete.add("warps");
+                tabComplete.add("warp");
+                tabComplete.add("setwarp");
+                tabComplete.add("delwarp");
+                tabComplete.add("home");
+                tabComplete.add("sethome");
+                tabComplete.add("spawn");
+                tabComplete.add("setspawn");
+                tabComplete.add("tpa");
+                tabComplete.add("tpaa");
+                tabComplete.add("tpad");
+                tabComplete.add("msg");
+                tabComplete.add("wild");
+                tabComplete.add("gamemode");
+                tabComplete.add("back");
             }
+
+            return tabComplete;
         }
 
         return null;
@@ -206,10 +234,10 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                 }else{
                     teleport(player, getWarp(warpName), "warp "+warpName, getColorRGB(5));
                 }
-                return true;
             }else{
                 player.sendMessage("§cThe warp specified doesn't exist.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a warp name.");
         }
@@ -225,18 +253,19 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                     if(!isWarp(warpName)){
                         setWarp(warpName, player.getLocation());
                         player.sendMessage("§7You have set the warp: §a"+warpName+"§7.");
-                        return true;
                     }else{
                         player.sendMessage("§cWarp already exists with this name.");
                     }
                 }else{
                     player.sendMessage("§cWarp name exceeds character requirements.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cOnly server admins can set server warps.");
+            return true;
         }
         return false;
     }
@@ -248,15 +277,16 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                 if(isWarp(warpName)){
                     removeWarp(warpName);
                     player.sendMessage("§7You have removed the warp: §a"+warpName+"§7.");
-                    return true;
                 }else{
                     player.sendMessage("§cWarp specified doesn't exist.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cOnly server admins can remove server warps.");
+            return true;
         }
         return false;
     }
@@ -296,11 +326,10 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
             }else{
                 teleport(player, spawn, "Spawn", getColorRGB(5));
             }
-            return true;
         }else{
             player.sendMessage("§cTheir doesn't seem to be a spawn set.");
         }
-        return false;
+        return true;
     }
 
     private boolean setSpawnCMD(Player player){
@@ -336,13 +365,13 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                         }
                     }, 600));
 
-                    return true;
                 }else{
                     player.sendMessage("§cYou cannot teleport to yourself.");
                 }
             }else{
                 player.sendMessage("§cThe player specified doesn't exist or is not online.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to teleport to.");
         }
@@ -389,6 +418,37 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
         return true;
     }
 
+    private boolean msg(Player player, String[] args){
+        if(args.length > 1){
+            Player receiver = Bukkit.getPlayer(args[0]);
+
+            if(receiver != null && receiver.isOnline()){
+                if(!receiver.getUniqueId().equals(player.getUniqueId())){
+                    String builder = "";
+                    for(int i = 1; i < args.length; i++){
+                        builder += args[i]+" ";
+                    }
+
+                    builder = builder.replaceAll("&", "§");
+                    builder = builder.substring(0, builder.length()-1);
+
+
+                    player.sendMessage("§o§7msg "+receiver.getName()+"§r§7: "+builder);
+                    receiver.sendMessage("§o§7msg "+receiver.getName()+"§r§7: "+builder);
+
+                }else{
+                    player.sendMessage("§cYou cannot message yourself.");
+                }
+            }else{
+                player.sendMessage("§cThe player specified doesn't exist or is not online.");
+            }
+            return true;
+        }else{
+            player.sendMessage("§cPlease specify a player and a message you wish to send.");
+        }
+        return false;
+    }
+
     private boolean wild(Player player){
         if(isWildTeleport()){
             if(!isWildDelayed(player)){
@@ -405,7 +465,7 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
 
                 if(inClaim(location.getChunk())){
                     player.sendMessage("§cCouldn't find a location outside a claim, try again.");
-                    return false;
+                    return true;
                 }
 
                 List<Material> dangerous = getDangerous();
@@ -413,7 +473,7 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
 
                 if(dangerous.contains(block.getType()) || block.getY() < 0){
                     player.sendMessage("§cCould not find a safe place to teleport, try again.");
-                    return false;
+                    return true;
                 }
 
                 block = block.getWorld().getBlockAt(block.getX(), block.getY()+1, block.getZ());
@@ -453,6 +513,64 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
             }
         }else{
             player.sendMessage("§cServer has back teleports disabled.");
+        }
+        return true;
+    }
+
+    public boolean gamemode(Player player, String[] args){
+        if(player.isOp()){
+            if(args.length > 0){
+                String mode = args[0].toLowerCase();
+
+                if(args.length > 1){
+                    Player receiver = Bukkit.getPlayer(args[1]);
+
+                    if(receiver != null && receiver.isOnline()){
+                        if(mode.equals("survival") || mode.equals("0")){
+                            receiver.setGameMode(GameMode.SURVIVAL);
+                            Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed §6"+receiver.getName()+"§7 gamemode to §aSURVIVAL§7 mode.");
+
+                        }else if(mode.equals("creative") || mode.equals("1")){
+                            receiver.setGameMode(GameMode.CREATIVE);
+                            Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed §6"+receiver.getName()+"§7 gamemode to §aCREATIVE§7 mode.");
+
+                        }else if(mode.equals("adventure") || mode.equals("2")){
+                            receiver.setGameMode(GameMode.ADVENTURE);
+                            Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed §6"+receiver.getName()+"§7 gamemode to §aADVENTURE§7 mode.");
+
+                        }else if(mode.equals("spectator") || mode.equals("3")){
+                            receiver.setGameMode(GameMode.SPECTATOR);
+                            Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed §6"+receiver.getName()+"§7 gamemode to §aSPECTATOR§7 mode.");
+                        }
+                    }else{
+                        player.sendMessage("§cPlayer specified isn't online.");
+                    }
+
+                }else{
+                    if(mode.equals("survival") || mode.equals("0")){
+                        player.setGameMode(GameMode.SURVIVAL);
+                        Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed their gamemode to §aSURVIVAL§7 mode.");
+
+                    }else if(mode.equals("creative") || mode.equals("1")){
+                        player.setGameMode(GameMode.CREATIVE);
+                        Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed their gamemode to §aCREATIVE§7 mode.");
+
+                    }else if(mode.equals("adventure") || mode.equals("2")){
+                        player.setGameMode(GameMode.ADVENTURE);
+                        Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed their gamemode to §aADVENTURE§7 mode.");
+
+                    }else if(mode.equals("spectator") || mode.equals("3")){
+                        player.setGameMode(GameMode.SPECTATOR);
+                        Bukkit.broadcastMessage("§6"+player.getName()+"§7 has changed their gamemode to §aSPECTATOR§7 mode.");
+                    }
+                }
+                return true;
+            }else{
+                player.sendMessage("§cPlease specify a gamemode.");
+                return false;
+            }
+        }else{
+            player.sendMessage("§cYou must be a server admin to change your gamemode.");
         }
         return true;
     }

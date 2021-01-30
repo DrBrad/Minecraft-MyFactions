@@ -25,12 +25,13 @@ public class Config {
     private static int teleportDelay = 2,
             wildRadius = 5000,
             wildDelay = 600,
-            createPower = 10,
-            claimCost = 2,
-            createWarpCost = 2,
+            createPower = 20,
+            claimCost = 5,
+            createWarpCost = 10,
             deathToll = 1,
-            joinPower = 10,
-            periodicIncrease = 1,
+            joinPower = 20,
+            periodicIncrease = 3,
+            periodicDecrease = 1,
             periodicTime = 1800;
 
     private static boolean wildTeleport = true,
@@ -62,6 +63,7 @@ public class Config {
                 deathToll = config.getInt("faction.death-toll");
                 joinPower = config.getInt("faction.join-power");
                 periodicIncrease = config.getInt("faction.periodic-power-increase");
+                periodicDecrease = config.getInt("faction.periodic-power-decrease");
                 periodicTime = config.getInt("faction.periodic-increase-time");
                 factionHome = config.getBoolean("faction.home");
                 factionWarp = config.getBoolean("faction.warp");
@@ -84,12 +86,13 @@ public class Config {
                 config.set("teleportation.home", true);
                 config.set("teleportation.wild-radius", 5000);
 
-                config.set("faction.create-power", 10);
-                config.set("faction.claim-cost", 2);
-                config.set("faction.create-warp-cost", 2);
+                config.set("faction.create-power", 20);
+                config.set("faction.claim-cost", 5);
+                config.set("faction.create-warp-cost", 10);
                 config.set("faction.death-toll", 1);
-                config.set("faction.join-power", 10);
-                config.set("faction.periodic-power-increase", 1);
+                config.set("faction.join-power", 20);
+                config.set("faction.periodic-power-increase", 3);
+                config.set("faction.periodic-power-decrease", 1);
                 config.set("faction.periodic-increase-time", 1800);
                 config.set("faction.home", true);
                 config.set("faction.warp", true);
@@ -146,6 +149,10 @@ public class Config {
 
     public static int getPeriodicIncrease(){
         return periodicIncrease;
+    }
+
+    public static int getPeriodicDecrease(){
+        return periodicDecrease;
     }
 
     public static int getPeriodicTime(){

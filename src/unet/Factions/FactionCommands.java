@@ -228,12 +228,12 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                             break;
 
                         case "setpower":
-                            if(args.length > 2){
+                            if(args.length == 3){
                                 if(isFaction(args[1].toLowerCase())){
                                     tabComplete.add(getFactionFromName(args[1].toLowerCase()).getPower()+"");
                                 }
 
-                            }else{
+                            }else if(args.length == 2){
                                 tabComplete.addAll(getListOfFactionNames());
                             }
                             break;
@@ -401,14 +401,13 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                     }else{
                         player.sendMessage("§cFailed to create faction.");
                     }
-                    return true;
-
                 }else{
                     player.sendMessage("§cFaction name is not allowed.");
                 }
             }else{
                 player.sendMessage("§cFaction name exceeds character requirements.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a faction name.");
         }
@@ -426,7 +425,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                         if(faction.rename(name, player.getUniqueId())){
                             renameFaction(oldName, name);
                             player.sendMessage("§7You have successfully created the faction §c"+name+"§7.");
-                            return true;
 
                         }else{
                             player.sendMessage("§cFailed to rename faction.");
@@ -440,6 +438,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cFaction name exceeds character requirements.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a faction name.");
         }
@@ -462,6 +461,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to change faction ownership to.");
         }
@@ -481,7 +481,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         }else{
             player.sendMessage("§cYou are not a part of a faction.");
         }
-        return false;
+        return true;
     }
 
     private boolean invite(Player player, String[] args){
@@ -511,8 +511,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                             }
                         }, 600));
 
-                        return true;
-
                     }else{
                         player.sendMessage("§cYou must be a faction recruit to invite players.");
                     }
@@ -522,6 +520,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a faction name.");
         }
@@ -570,9 +569,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                         if(receiver.isOnline()){
                             receiver.getPlayer().sendMessage("§cYou have been kicked from the faction!");
                         }
-
-                        return true;
-
                     }else{
                         player.sendMessage("§cYou must be at least a faction admin to remove players.");
                     }
@@ -582,6 +578,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to remove from the faction.");
         }
@@ -607,7 +604,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         }else{
             player.sendMessage("§cYou are not a part of a faction.");
         }
-        return false;
+        return true;
     }
 
     private boolean promote(Player player, String[] args){
@@ -641,6 +638,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to promote.");
         }
@@ -667,7 +665,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                                 member.getPlayer().sendMessage("§a"+receiver.getName()+"§7 has been demoted to §a"+names[rank]+"§7.");
                             }
                         }
-                        return true;
 
                     }else{
                         player.sendMessage("§cYou must be at least a faction admin to demote players.");
@@ -678,6 +675,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a player you wish to demote.");
         }
@@ -692,18 +690,16 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else if(args[1].equalsIgnoreCase("pvpzone") || args[1].equalsIgnoreCase("pvp-zone")){
                 claimChunk(player, chunk, getPvpZone());
             }
-            return true;
 
         }else{
             MyFaction faction = getPlayersFaction(player.getUniqueId());
             if(faction != null){
                 claimChunk(player, chunk, faction);
-                return true;
             }else{
                 player.sendMessage("§cYou must be a part of a faction to claim.");
             }
         }
-        return false;
+        return true;
     }
 
     private boolean autoClaim(Player player, String[] args){
@@ -729,7 +725,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 claimChunk(player, chunk, getPvpZone());
                 player.sendMessage("§7You are now §aauto claiming§7 for PVP Zones.");
             }
-            return true;
 
         }else{
             MyFaction faction = getPlayersFaction(player.getUniqueId());
@@ -737,12 +732,11 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 startAutoClaiming(player.getUniqueId(), faction, true);
                 claimChunk(player, chunk, faction);
                 player.sendMessage("§7You are now §aauto claiming§7 for "+faction.getName()+".");
-                return true;
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
         }
-        return false;
+        return true;
     }
 
     private boolean unclaim(Player player, String[] args){
@@ -754,18 +748,16 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else if(args[1].equalsIgnoreCase("pvpzone") || args[1].equalsIgnoreCase("pvp-zone")){
                 unclaimChunk(player, chunk, getPvpZone());
             }
-            return true;
 
         }else{
             MyFaction faction = getPlayersFaction(player.getUniqueId());
             if(faction != null){
                 unclaimChunk(player, chunk, faction);
-                return true;
             }else{
                 player.sendMessage("§cYou must be a part of a faction to unclaim.");
             }
         }
-        return false;
+        return true;
     }
 
     private boolean autoUnclaim(Player player, String[] args){
@@ -791,7 +783,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 claimChunk(player, chunk, getPvpZone());
                 player.sendMessage("§7You are now §aauto unclaiming§7 for PVP Zones.");
             }
-            return true;
 
         }else{
             MyFaction faction = getPlayersFaction(player.getUniqueId());
@@ -799,12 +790,11 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 startAutoClaiming(player.getUniqueId(), faction, false);
                 claimChunk(player, chunk, faction);
                 player.sendMessage("§7You are now §aauto unclaiming§7 for "+faction.getName()+".");
-                return true;
             }else{
                 player.sendMessage("§cYou are not a part of a faction.");
             }
         }
-        return false;
+        return true;
     }
 
     private boolean rank(Player player){
@@ -812,12 +802,11 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         if(faction != null){
             String[] names = { "Member", "Recruit", "Admin", "Owner" };
             player.sendMessage("§7Your rank in the faction is: §a"+names[faction.getRank(player.getUniqueId())]+"§7.");
-            return true;
 
         }else{
             player.sendMessage("§cYou are not a part of a faction.");
         }
-        return false;
+        return true;
     }
 
     private boolean power(Player player){
@@ -828,12 +817,11 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§7Your factions power level is: §c"+faction.getPower()+"§7.");
             }
-            return true;
 
         }else{
             player.sendMessage("§cYou are not a part of a faction.");
         }
-        return false;
+        return true;
     }
 
     private boolean setPower(Player player, String[] args){
@@ -846,7 +834,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                     int power = Integer.parseInt(args[2]);
                     faction.setPower(power);
                     player.sendMessage("§7You have set §c"+faction.getName()+"§7 power level to §a"+power+"§7.");
-                    return true;
 
                 }else{
                     player.sendMessage("§cFaction specified doesn't exist.");
@@ -854,6 +841,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cOnly server admins can set faction power level.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a faction name and a power level.");
         }
@@ -872,13 +860,13 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 builder = builder.replaceAll("&", "§");
                 if(faction.setDescription(player.getUniqueId(), builder.substring(0, builder.length()-1))){
                     player.sendMessage("§7You have set the factions description§7.");
-                    return true;
                 }else{
                     player.sendMessage("§cYou must be at least a faction admin to set factions color.");
                 }
             }else{
                 player.sendMessage("§cYou are not in a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease state a description for your faction.");
         }
@@ -894,7 +882,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 int colorCode = getColorCode(color);
                 if(faction.setColor(player.getUniqueId(), colorCode)){
                     player.sendMessage("§7You have set the faction color to "+getChatColor(colorCode)+color+"§7.");
-                    return true;
 
                 }else{
                     player.sendMessage("§cYou must be at least a faction admin to set factions color.");
@@ -902,6 +889,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             }else{
                 player.sendMessage("§cYou are not in a faction.");
             }
+            return true;
         }else{
             player.sendMessage("§cPlease specify a color for your faction.");
         }
@@ -938,8 +926,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
             if(faction != null){
                 Location home = faction.getHome();
                 if(home != null){
-                    teleport(player, home, "Faction Home", getColorRGB(faction.getColor()));
-                    return true;
+                    teleport(player, home, "faction Home", getColorRGB(faction.getColor()));
 
                 }else{
                     player.sendMessage("§cYour faction doesn't have a home set.");
@@ -950,7 +937,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         }else{
             player.sendMessage("§cServer has faction homes disabled.");
         }
-        return false;
+        return true;
     }
 
     private boolean setHome(Player player){
@@ -965,7 +952,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                         if(faction.canClaim(player.getUniqueId())){
                             faction.setHome(player.getLocation());
                             player.sendMessage("§7Your have set your factions §ahome§7.");
-                            return true;
 
                         }else{
                             player.sendMessage("§cYou must be at least faction admin to set faction home.");
@@ -982,7 +968,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         }else{
             player.sendMessage("§cServer has faction homes disabled.");
         }
-        return false;
+        return true;
     }
 
     public boolean warp(Player player, String[] args){
@@ -994,8 +980,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                     Location warp = faction.getWarp(warpName);
 
                     if(warp != null){
-                        teleport(player, warp, "Faction warp "+warpName, getColorRGB(faction.getColor()));
-                        return true;
+                        teleport(player, warp, "faction warp "+warpName, getColorRGB(faction.getColor()));
 
                     }else{
                         player.sendMessage("§cYour faction doesn't have a warp set with the name specified.");
@@ -1003,11 +988,13 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 }else{
                     player.sendMessage("§cYou are not a part of a faction.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cServer has faction warps disabled.");
+            return true;
         }
         return false;
     }
@@ -1028,7 +1015,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                                         if(!faction.isWarp(warpName)){
                                             faction.setWarp(warpName, player.getLocation());
                                             player.sendMessage("§7You have set the faction warp: §a"+warpName+"§7.");
-                                            return true;
 
                                         }else{
                                             player.sendMessage("§cYour faction already has warp with this name.");
@@ -1051,11 +1037,13 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 }else{
                     player.sendMessage("§cYou are not a part of a faction.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cServer has faction warps disabled.");
+            return true;
         }
         return false;
     }
@@ -1071,7 +1059,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                         if(faction.isWarp(warpName)){
                             faction.removeWarp(warpName);
                             player.sendMessage("§7You have removed the faction warp: §a"+warpName+"§7.");
-                            return true;
 
                         }else{
                             player.sendMessage("§cYour faction doesn't have a warp set with the name specified.");
@@ -1082,11 +1069,13 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 }else{
                     player.sendMessage("§cYou are not a part of a faction.");
                 }
+                return true;
             }else{
                 player.sendMessage("§cPlease specify a warp name.");
             }
         }else{
             player.sendMessage("§cServer has faction warps disabled.");
+            return true;
         }
         return false;
     }

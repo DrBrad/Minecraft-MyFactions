@@ -1,17 +1,13 @@
 package unet.Factions;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import unet.Factions.Claim.Claim;
@@ -120,6 +116,14 @@ public class MyEventHandler implements Listener {
 
     @EventHandler
     public void onBlockPlace(BlockPlaceEvent event){
+        if(event.getBlock().getBlockData() instanceof Waterlogged){
+            if(((Waterlogged) event.getBlock().getBlockData()).isWaterlogged()){
+                event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
+                event.setCancelled(true);
+                return;
+            }
+        }
+
         Chunk chunk = event.getBlock().getChunk();
 
         if(inClaim(chunk)){
@@ -216,6 +220,53 @@ public class MyEventHandler implements Listener {
                     }
                 }
             }
+        }
+    }
+
+    @EventHandler
+    public void onDispenseWaterLog(BlockDispenseEvent event){
+        Block block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()-1, event.getBlock().getY(), event.getBlock().getZ());
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+
+        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()+1, event.getBlock().getY(), event.getBlock().getZ());
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+
+        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()-1);
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+
+        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()+1);
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+
+        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()-1, event.getBlock().getZ());
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+
+        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()+1, event.getBlock().getZ());
+        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    @EventHandler
+    public void onBucketEmpty(PlayerBucketEmptyEvent event){
+        if(event.getBucket() == Material.WATER_BUCKET && event.getBlockClicked().getBlockData() instanceof Waterlogged){
+            event.setCancelled(true);
+            event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
         }
     }
 
