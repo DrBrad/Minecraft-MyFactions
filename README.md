@@ -50,6 +50,7 @@ Commands
 - **/f setpower**  Set faction power
 - **/f rank**      Get your rank in faction
 - **/f setdesc**   Set factions description
+- **/f setcolor**   Set factions color
 - **/f version**   Version of factions
 
 Extra Commands
