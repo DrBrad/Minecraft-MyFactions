@@ -49,6 +49,7 @@ Commands
 - **/f chown**     Change faction ownership
 - **/f setpower**  Set faction power
 - **/f rank**      Get your rank in faction
+- **/f setdesc**   Set factions description.
 - **/f version**   Version of factions
 
 Extra Commands
