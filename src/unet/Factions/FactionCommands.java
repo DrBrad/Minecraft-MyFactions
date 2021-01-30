@@ -301,7 +301,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
     private boolean help(Player player, String[] args){
         if(args.length > 1){
             if(args[1].equals("2")){
-                player.sendMessage("§c------- §fFaction commands (2/4) §c-------");
+                player.sendMessage("§c------- §fFaction commands (2/5) §c-------");
                 player.sendMessage("§c/f unclaim: §7Removes claim from your faction.");
                 player.sendMessage("§c/f autoclaim: §7Automatically claim a chunk for your faction.");
                 player.sendMessage("§c/f unclaim: §7Automatically removes claim from your faction.");
@@ -314,7 +314,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 return true;
 
             }else if(args[1].equals("3")){
-                player.sendMessage("§c------- §fFaction commands (3/4) §c-------");
+                player.sendMessage("§c------- §fFaction commands (3/5) §c-------");
                 player.sendMessage("§c/f power: §7Check yours or another factions power.");
                 player.sendMessage("§c/f list: §7List of all of the factions.");
                 player.sendMessage("§c/f rename: §7Rename your faction something else.");
@@ -327,7 +327,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 return true;
 
             }else if(args[1].equals("4")){
-                player.sendMessage("§c------- §fFaction commands (4/4) §c-------");
+                player.sendMessage("§c------- §fFaction commands (4/5) §c-------");
                 player.sendMessage("§c/f unclaim safezone: §7Unclaim Safe-Zone for server.");
                 player.sendMessage("§c/f autoclaim safezone: §7Automatically claims safezone.");
                 player.sendMessage("§c/f autounclaim safezone: §7Automatically removes safezone claims.");
@@ -336,12 +336,17 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                 player.sendMessage("§c/f autoclaim pvpzone: §7Automatically claims pvpzone.");
                 player.sendMessage("§c/f autounclaim pvpzone: §7Automatically removes pvpzone claims.");
                 player.sendMessage("§c/f setdesc: §7Set factions description.");
+                player.sendMessage("§c/f setcolor: §7Set factions color.");
+                return true;
+
+            }else if(args[1].equals("5")){
+                player.sendMessage("§c------- §fFaction commands (5/5) §c-------");
                 player.sendMessage("§c/f version: §7Get the version of this plugin.");
                 return true;
             }
         }
 
-        player.sendMessage("§c------- §fFaction commands (1/4) §c-------");
+        player.sendMessage("§c------- §fFaction commands (1/5) §c-------");
         player.sendMessage("§c/f create: §7Creates a faction.");
         player.sendMessage("§c/f invite: §7Invites player to faction.");
         player.sendMessage("§c/f join: §7Join faction from invite.");

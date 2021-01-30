@@ -119,6 +119,10 @@ commands:
     description: Set factions power.
     usage: |
       /f setpower FACTION_NAME POWER_LEVEL
+  f setcolor:
+    description: Set factions color.
+    usage: |
+      /f setcolor COLOR
   f setdesc:
     description: Set factions description.
     usage: |
