@@ -67,6 +67,8 @@ Extra Commands
 - **/tpaa**       Teleport accept player
 - **/tpad**       Deny teleport for player
 - **/wild**       Teleport to a random location that isn't owned by a faction
+- **/msg**        Message a player privatly
+- **/gamemode**   Better gamemode changing
 - **/back**       Go back to last location teleported
 
 License
