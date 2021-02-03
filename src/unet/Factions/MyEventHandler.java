@@ -191,6 +191,36 @@ public class MyEventHandler implements Listener {
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
 
+            Chunk chunk = block.getChunk();
+            if(inClaim(chunk)){
+                Claim claim = getClaim(chunk);
+                if(claim.getType() > 0){
+                    if(getSafeNoEdit().contains(block.getType())){
+                        if(!event.getPlayer().isOp()){
+                            event.setCancelled(true);
+                            event.getPlayer().sendMessage("§cOnly server admins can interact with blocks in zones.");
+                        }
+                    }
+
+                }else if(getNoEdit().contains(block.getType())){
+                    MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
+                    if(faction != null){
+                        if(!faction.getKey().equals(claim.getKey())){
+                            event.setCancelled(true);
+                            event.getPlayer().sendMessage("§cYou cannot interact with blocks in other factions claims.");
+
+                        }else if(!faction.canBuild(event.getPlayer().getUniqueId())){
+                            event.setCancelled(true);
+                            event.getPlayer().sendMessage("§cYou cannot interact with blocks as a member.");
+                        }
+                    }else{
+                        event.setCancelled(true);
+                        event.getPlayer().sendMessage("§cYou cannot interact with blocks in other factions claims.");
+                    }
+                }
+            }
+
+            /*
             if(getNoEdit().contains(block.getType())){
                 Chunk chunk = block.getChunk();
 
@@ -220,6 +250,7 @@ public class MyEventHandler implements Listener {
                     }
                 }
             }
+            */
         }
     }
 
@@ -296,10 +327,12 @@ public class MyEventHandler implements Listener {
                 MyFaction victomsFaction = getFactionFromUUID(attacker.getUniqueId());
                 MyFaction attackerFaction = getFactionFromUUID(attacker.getUniqueId());
 
-                if(victomsFaction.getKey().equals(attackerFaction.getKey())){
-                    event.setDamage(0.0F);
-                    event.setCancelled(true);
-                    attacker.sendMessage("§cYou cannot attack players in your own faction.");
+                if(victomsFaction != null && attackerFaction != null){
+                    if(victomsFaction.getKey().equals(attackerFaction.getKey())){
+                        event.setDamage(0.0F);
+                        event.setCancelled(true);
+                        attacker.sendMessage("§cYou cannot attack players in your own faction.");
+                    }
                 }
             }
         }

@@ -92,7 +92,7 @@ public class MyFaction implements Faction {
     }
 
     public boolean canInvite(UUID sender, UUID receiver){
-        if(ranks.has(sender.toString()) && ranks.has(receiver.toString()) && !isPlayerInFaction(receiver)){
+        if(ranks.has(sender.toString()) && !ranks.has(receiver.toString()) && !isPlayerInFaction(receiver)){
             if(ranks.getInt(sender.toString()) > 0){
                 return true;
             }
@@ -145,7 +145,7 @@ public class MyFaction implements Faction {
     public boolean promote(UUID sender, UUID receiver){
         if(ranks.has(sender.toString()) && ranks.has(receiver.toString())){
             if(ranks.getInt(sender.toString())-1 > ranks.getInt(receiver.toString()) && ranks.getInt(receiver.toString()) != 3){
-                ranks.put(receiver.toString(), ((Long) ranks.get(receiver.toString())).intValue()+1);
+                ranks.put(receiver.toString(), ranks.getInt(receiver.toString())+1);
                 writeRanks();
                 return true;
             }
@@ -156,7 +156,7 @@ public class MyFaction implements Faction {
     public boolean demote(UUID sender, UUID receiver){
         if(ranks.has(sender.toString()) && ranks.has(receiver.toString())){
             if(ranks.getInt(sender.toString())-1 > ranks.getInt(receiver.toString()) && ranks.getInt(receiver.toString()) != 3){
-                ranks.put(receiver.toString(), ((Long) ranks.get(receiver.toString())).intValue()-1);
+                ranks.put(receiver.toString(), ranks.getInt(receiver.toString())-1);
                 writeRanks();
                 return true;
             }

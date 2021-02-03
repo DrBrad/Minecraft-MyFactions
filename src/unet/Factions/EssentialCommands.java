@@ -388,10 +388,10 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
 
                 MyFaction faction = getPlayersFaction(player.getUniqueId());
                 if(faction != null){
-                    teleport(sender, player.getLocation(), "Back", getColorRGB(faction.getColor()));
+                    teleport(sender, player.getLocation(), player.getName(), getColorRGB(faction.getColor()));
 
                 }else{
-                    teleport(sender, player.getLocation(), "Back", getColorRGB(5));
+                    teleport(sender, player.getLocation(), player.getName(), getColorRGB(5));
                 }
             }else{
                 player.sendMessage("§cPlayer is no longer online.");
