@@ -104,7 +104,10 @@ public class ClaimHandler {
                     player.sendMessage("§cThis chunk is claimed by a zone, you cannot over claim this chunk.");
                 }
             }else{
-                claims.put(key, new Claim(faction.getKey(), faction.getType()));
+                JSONObject jclaim = new JSONObject();
+                jclaim.put("k", faction.getKey().toString());
+                jclaim.put("t", faction.getType());
+                claims.put(key, jclaim);
                 faction.setPower(faction.getPower()-getClaimCost());
                 write();
                 player.sendMessage("§7You have §aclaimed§7 this chunk for "+faction.getName()+".");
@@ -136,7 +139,10 @@ public class ClaimHandler {
                 return true;
             }
         }else{
-            claims.put(key, new Claim(zone.getKey(), zone.getType()));
+            JSONObject jclaim = new JSONObject();
+            jclaim.put("k", zone.getKey().toString());
+            jclaim.put("t", zone.getType());
+            claims.put(key, jclaim);
             write();
             player.sendMessage("§7You have §aclaimed§7 this chunk for "+zone.getName()+".");
             return true;

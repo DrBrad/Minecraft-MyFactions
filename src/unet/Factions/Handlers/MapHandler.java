@@ -53,7 +53,11 @@ public class MapHandler {
                 for(int i = size; i > 0; i--){
                     if(map.get(player.getUniqueId()).size() > i){
                         Location location = map.get(player.getUniqueId()).get(i);
-                        if(player.getLocation().distance(location) > 300){
+                        if(location.getWorld() == centerChunk.getWorld()){
+                            if(player.getLocation().distance(location) > 300){
+                                map.get(player.getUniqueId()).remove(i);
+                            }
+                        }else{
                             map.get(player.getUniqueId()).remove(i);
                         }
                     }
