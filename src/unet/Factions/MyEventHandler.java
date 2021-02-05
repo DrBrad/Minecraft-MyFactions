@@ -84,6 +84,16 @@ public class MyEventHandler implements Listener {
     }
 
     @EventHandler
+    public static void onPortalTravel(PlayerPortalEvent event){
+        if(event.getCause() == PlayerPortalEvent.TeleportCause.END_PORTAL){
+            Location endSpawn = getEndSpawn();
+            if(endSpawn != null){
+                event.setTo(endSpawn);
+            }
+        }
+    }
+
+    @EventHandler
     public void onChat(AsyncPlayerChatEvent event){
         MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
         if(faction != null){

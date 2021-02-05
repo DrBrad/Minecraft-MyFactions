@@ -17,7 +17,7 @@ import static unet.Factions.Main.plugin;
 
 public class Config {
 
-    private static Location spawn;
+    private static Location spawn, endSpawn;
     private static HashMap<String, Location> warps = new HashMap<>();
     private static HashMap<Player, Player> playerTeleport = new HashMap<>();
     public static HashMap<Player, Long> wildDelayed = new HashMap<>();
@@ -75,6 +75,15 @@ public class Config {
                             config.getDouble("spawn.z"),
                             (float)config.getDouble("spawn.yaw"),
                             (float)config.getDouble("spawn.pitch"));
+                }
+
+                if(config.contains("end-spawn")){
+                    endSpawn = new Location(Bukkit.getWorld(config.getString("end-spawn.world")),
+                            config.getDouble("end-spawn.x"),
+                            config.getDouble("end-spawn.y"),
+                            config.getDouble("end-spawn.z"),
+                            (float)config.getDouble("end-spawn.yaw"),
+                            (float)config.getDouble("end-spawn.pitch"));
                 }
 
             }else{
@@ -192,6 +201,15 @@ public class Config {
         return spawn;
     }
 
+    public static void setEndSpawn(Location location){
+        endSpawn = location;
+        writeConfig();
+    }
+
+    public static Location getEndSpawn(){
+        return endSpawn;
+    }
+
     public static Location getWarp(String name){
         if(warps.containsKey(name.toLowerCase())){
             return warps.get(name.toLowerCase());
@@ -287,6 +305,15 @@ public class Config {
                 config.set("spawn.z", spawn.getZ());
                 config.set("spawn.yaw", spawn.getYaw());
                 config.set("spawn.pitch", spawn.getPitch());
+            }
+
+            if(endSpawn != null){
+                config.set("end-spawn.world", endSpawn.getWorld().getName());
+                config.set("end-spawn.x", endSpawn.getX());
+                config.set("end-spawn.y", endSpawn.getY());
+                config.set("end-spawn.z", endSpawn.getZ());
+                config.set("end-spawn.yaw", endSpawn.getYaw());
+                config.set("end-spawn.pitch", endSpawn.getPitch());
             }
 
             config.save(configFile);

@@ -1,9 +1,6 @@
 package unet.Factions;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,6 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import unet.Factions.Faction.MyFaction;
+import unet.Factions.Handlers.Config;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -39,10 +37,10 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                     return warp(((Player) commandSender), args);
 
                 case "setwarp":
-                    return setWarpCMD(((Player) commandSender), args);
+                    return setWarp(((Player) commandSender), args);
 
                 case "delwarp":
-                    return removeWarpCMD(((Player) commandSender), args);
+                    return removeWarp(((Player) commandSender), args);
 
                 case "home":
                     return home(((Player) commandSender));
@@ -54,7 +52,10 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
                     return spawn(((Player) commandSender));
 
                 case "setspawn":
-                    return setSpawnCMD(((Player) commandSender));
+                    return setSpawn(((Player) commandSender));
+
+                case "setendspawn":
+                    return setSpawn(((Player) commandSender));
 
                 case "tpaa":
                     return tpaa(((Player) commandSender));
@@ -244,14 +245,14 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
         return false;
     }
 
-    public boolean setWarpCMD(Player player, String[] args){
+    public boolean setWarp(Player player, String[] args){
         if(player.isOp()){
             if(args.length > 0){
 
                 String warpName = args[0];
                 if(warpName.length() < 13 && warpName.length() > 1){
                     if(!isWarp(warpName)){
-                        setWarp(warpName, player.getLocation());
+                        Config.setWarp(warpName, player.getLocation());
                         player.sendMessage("§7You have set the warp: §a"+warpName+"§7.");
                     }else{
                         player.sendMessage("§cWarp already exists with this name.");
@@ -270,12 +271,12 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
         return false;
     }
 
-    public boolean removeWarpCMD(Player player, String[] args){
+    public boolean removeWarp(Player player, String[] args){
         if(player.isOp()){
             if(args.length > 0){
                 String warpName = args[0];
                 if(isWarp(warpName)){
-                    removeWarp(warpName);
+                    Config.removeWarp(warpName);
                     player.sendMessage("§7You have removed the warp: §a"+warpName+"§7.");
                 }else{
                     player.sendMessage("§cWarp specified doesn't exist.");
@@ -332,10 +333,20 @@ public class EssentialCommands implements CommandExecutor, TabExecutor {
         return true;
     }
 
-    private boolean setSpawnCMD(Player player){
+    private boolean setSpawn(Player player){
         if(player.isOp()){
-            setSpawn(player.getPlayer().getLocation());
-            player.sendMessage("§7You have set server spawn.");
+            World.Environment environment = player.getLocation().getWorld().getEnvironment();
+            if(environment == World.Environment.NORMAL){
+                Config.setSpawn(player.getPlayer().getLocation());
+                player.sendMessage("§7You have set server spawn.");
+
+            }else if(environment == World.Environment.THE_END){
+                Config.setEndSpawn(player.getPlayer().getLocation());
+                player.sendMessage("§7You have set server end spawn.");
+
+            }else{
+                player.sendMessage("§7You cannot set the nethers spawn.");
+            }
         }else{
             player.sendMessage("§cOnly server admins can set spawn.");
         }
