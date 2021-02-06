@@ -393,7 +393,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         if(args.length > 1){
             String name = args[1];
             if(name.length() < 13 && name.length() > 1){
-                if(isBannedName(name)){
+                if(!isBannedName(name)){
                     MyFaction faction = new MyFaction().create(name, player.getUniqueId());
                     if(faction != null){
                         createFaction(player.getUniqueId(), faction);
@@ -418,7 +418,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
         if(args.length > 1){
             String name = args[1];
             if(name.length() < 13 && name.length() > 1){
-                if(isBannedName(name)){
+                if(!isBannedName(name)){
                     MyFaction faction = getPlayersFaction(player.getUniqueId());
                     if(faction != null){
                         String oldName = faction.getName();
