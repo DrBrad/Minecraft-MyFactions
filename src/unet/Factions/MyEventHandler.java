@@ -334,7 +334,7 @@ public class MyEventHandler implements Listener {
             if(event.getDamager() instanceof Player){
                 Player attacker = (Player) event.getDamager();
 
-                MyFaction victomsFaction = getFactionFromUUID(attacker.getUniqueId());
+                MyFaction victomsFaction = getFactionFromUUID(player.getUniqueId());
                 MyFaction attackerFaction = getFactionFromUUID(attacker.getUniqueId());
 
                 if(victomsFaction != null && attackerFaction != null){
