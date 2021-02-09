@@ -6,6 +6,7 @@ import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
@@ -83,7 +84,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public static void onPortalTravel(PlayerPortalEvent event){
         if(event.getCause() == PlayerPortalEvent.TeleportCause.END_PORTAL){
             Location endSpawn = getEndSpawn();
@@ -124,7 +125,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event){
         if(event.getBlock().getBlockData() instanceof Waterlogged){
             if(((Waterlogged) event.getBlock().getBlockData()).isWaterlogged()){
@@ -164,7 +165,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockBreak(BlockBreakEvent event){
         Chunk chunk = event.getBlock().getChunk();
 
@@ -196,7 +197,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onInteract(PlayerInteractEvent event){
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
@@ -229,42 +230,19 @@ public class MyEventHandler implements Listener {
                     }
                 }
             }
-
-            /*
-            if(getNoEdit().contains(block.getType())){
-                Chunk chunk = block.getChunk();
-
-                if(inClaim(chunk)){
-                    Claim claim = getClaim(chunk);
-                    if(claim.getType() > 0){
-                        if(!event.getPlayer().isOp()){
-                            event.setCancelled(true);
-                            event.getPlayer().sendMessage("§cOnly server admins can interact with blocks in zones.");
-                        }
-
-                    }else{
-                        MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
-                        if(faction != null){
-                            if(!faction.getKey().equals(claim.getKey())){
-                                event.setCancelled(true);
-                                event.getPlayer().sendMessage("§cYou cannot interact with blocks in other factions claims.");
-
-                            }else if(!faction.canBuild(event.getPlayer().getUniqueId())){
-                                event.setCancelled(true);
-                                event.getPlayer().sendMessage("§cYou cannot interact with blocks as a member.");
-                            }
-                        }else{
-                            event.setCancelled(true);
-                            event.getPlayer().sendMessage("§cYou cannot interact with blocks in other factions claims.");
-                        }
-                    }
-                }
-            }
-            */
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onBlockFromTo(BlockFromToEvent event){
+        if(event.getBlock().getType() == Material.WATER){
+            if(event.getToBlock().getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onDispenseWaterLog(BlockDispenseEvent event){
         Block block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()-1, event.getBlock().getY(), event.getBlock().getZ());
         if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
@@ -303,7 +281,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBucketEmpty(PlayerBucketEmptyEvent event){
         if(event.getBucket() == Material.WATER_BUCKET && event.getBlockClicked().getBlockData() instanceof Waterlogged){
             event.setCancelled(true);
@@ -334,8 +312,8 @@ public class MyEventHandler implements Listener {
             if(event.getDamager() instanceof Player){
                 Player attacker = (Player) event.getDamager();
 
-                MyFaction victomsFaction = getFactionFromUUID(player.getUniqueId());
-                MyFaction attackerFaction = getFactionFromUUID(attacker.getUniqueId());
+                MyFaction victomsFaction = getPlayersFaction(player.getUniqueId());
+                MyFaction attackerFaction = getPlayersFaction(attacker.getUniqueId());
 
                 if(victomsFaction != null && attackerFaction != null){
                     if(victomsFaction.getKey().equals(attackerFaction.getKey())){
@@ -381,7 +359,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onCreatureSpawn(CreatureSpawnEvent event){
         Chunk chunk = event.getLocation().getChunk();
 
@@ -393,7 +371,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityExplode(EntityExplodeEvent event){
         Chunk chunk = event.getLocation().getChunk();
 
@@ -417,7 +395,7 @@ public class MyEventHandler implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onChangeBlock(EntityChangeBlockEvent event){
         if(event.getEntity().getType().equals(EntityType.ENDERMAN)){
             Chunk chunk = event.getBlock().getLocation().getChunk();

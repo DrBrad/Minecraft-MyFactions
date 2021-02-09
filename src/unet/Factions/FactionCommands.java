@@ -561,7 +561,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
 
                         for(String uuid : faction.getPlayers()){
                             OfflinePlayer member = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId())){
+                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId().toString())){
                                 member.getPlayer().sendMessage("§c"+receiver.getName()+"§7 has been kicked from the faction!");
                             }
                         }
@@ -623,7 +623,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
 
                         for(String uuid : faction.getPlayers()){
                             OfflinePlayer member = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId()) && !uuid.equals(receiver.getUniqueId())){
+                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId().toString())){
                                 member.getPlayer().sendMessage("§a"+receiver.getName()+"§7 has been promoted to §a"+names[rank]+"§7.");
                             }
                         }
@@ -661,7 +661,7 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
 
                         for(String uuid : faction.getPlayers()){
                             OfflinePlayer member = Bukkit.getOfflinePlayer(UUID.fromString(uuid));
-                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId()) && !uuid.equals(receiver.getUniqueId())){
+                            if(member != null && member.isOnline() && !uuid.equals(player.getUniqueId().toString())){
                                 member.getPlayer().sendMessage("§a"+receiver.getName()+"§7 has been demoted to §a"+names[rank]+"§7.");
                             }
                         }
