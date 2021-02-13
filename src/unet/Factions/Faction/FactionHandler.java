@@ -150,6 +150,8 @@ public class FactionHandler {
             factionsByName.remove(faction.getName().toLowerCase());
         }
 
+        unclaimAllForFaction(faction.getKey());
+
         for(String suuid : faction.getPlayers()){
             UUID uuid = UUID.fromString(suuid);
             if(players.has(uuid.toString())){

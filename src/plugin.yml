@@ -1,5 +1,5 @@
 name: MyFactions
-version: 2.2
+version: 2.3
 author: DrBrad
 main: unet.Factions.Main
 description: Im the best their is plain and simple, I mean I wake up and piss excellance
@@ -223,3 +223,134 @@ commands:
     description: Teleport back to previous location.
     usage: |
       /back
+
+permissions:
+  f.admin:
+    default: false
+    description: Edit all claims and perform any faction command
+  f.help:
+    default: true
+    description: List of faction commands
+  f.create:
+    default: true
+    description: List of faction commands
+  f.invite:
+    default: true
+    description: Invites player to faction.
+  f.join:
+    default: true
+    description: Join faction from invite.
+  f.leave:
+    default: true
+    description: Leave your faction.
+  f.remove:
+    default: true
+    description: Remove player from your faction.
+  f.promote:
+    default: true
+    description: Promote player in faction.
+  f.demote:
+    default: true
+    description: Demote player in faction.
+  f.disband:
+    default: true
+    description: Deletes your faction.
+  f.claim:
+    default: true
+    description: Claim a chunk for your faction.
+  f.unclaim:
+    default: true
+    description: Removes claim from your faction.
+  f.autoclaim:
+    default: true
+    description: Automatically claim a chunk for your faction.
+  f.autounclaim:
+    default: true
+    description: Automatically removes claim from your faction.
+  f.home:
+    default: true
+    description: Teleport to your factions home.
+  f.sethome:
+    default: true
+    description: Set your factions home.
+  f.warp:
+    default: true
+    description: Teleport to one of your factions warps.
+  f.warps:
+    default: true
+    description: Lists all warps for your faction.
+  f.setwarp:
+    default: true
+    description: Set a warp for your faction.
+  f.delwarp:
+    default: true
+    description: Removes a warp from your faction.
+  f.power:
+    default: true
+    description: Check yours or another factions power.
+  f.list:
+    default: true
+    description: List of all of the factions.
+  f.rename:
+    default: true
+    description: Rename your faction something else.
+  f.chat:
+    default: true
+    description: Chat with only faction members or globally.
+  f.map:
+    default: true
+    description: See all faction claims chunks visually.
+  f.rank:
+    default: true
+    description: Get your rank in faction.
+  f.chown:
+    default: true
+    description: Change faction ownership.
+  f.setcolor:
+    default: true
+    description: Set factions color.
+  f.setdesc:
+    default: true
+    description: Set factions description.
+  f.version:
+    default: true
+    description: Get the version of this plugin.
+  warp:
+    default: true
+    description: Warp to a location.
+  warps:
+    default: true
+    description: List of server warps.
+  setwarp:
+    default: false
+    description: Set server warp location.
+  delwarp:
+    default: false
+    description: Delete a server warp.
+  home:
+    default: true
+    description: Teleport to your home.
+  sethome:
+    default: true
+    description: Set your home.
+  spawn:
+    default: true
+    description: Teleport to server spawn.
+  setspawn:
+    default: false
+    description: Set server spawn.
+  tpa:
+    default: true
+    description: Teleport to player.
+  msg:
+    default: true
+    description: Message another player in private.
+  wild:
+    default: true
+    description: Teleport randomly in the wild to land unclaimed.
+  gamemode:
+    default: false
+    description: Change your gamemode
+  back:
+    default: true
+    description: Teleport back to previous location.

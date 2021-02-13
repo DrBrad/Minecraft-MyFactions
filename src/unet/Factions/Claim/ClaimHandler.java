@@ -240,6 +240,19 @@ public class ClaimHandler {
         }
     }
 
+    public static void unclaimAllForFaction(UUID uuid){
+        if(claims.length() > 0){
+            for(int i = claims.names().length()-1; i > -1; i--){
+                String key = claims.names().getString(i);
+                if(claims.getJSONObject(claims.names().getString(i)).getString("k").equals(uuid.toString())){
+                    claims.remove(key);
+                }
+            }
+
+            write();
+        }
+    }
+
 
 
 

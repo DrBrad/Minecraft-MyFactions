@@ -19,7 +19,7 @@ public class Zone implements Faction {
 
     @Override
     public boolean canClaim(UUID uuid){
-        return Bukkit.getPlayer(uuid).isOp();
+        return Bukkit.getPlayer(uuid).hasPermission("f.admin");
     }
 
     @Override

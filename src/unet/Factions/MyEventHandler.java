@@ -5,9 +5,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Waterlogged;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
@@ -37,7 +35,7 @@ public class MyEventHandler implements Listener {
         MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
         if(faction != null){
             String color = getChatColor(faction.getColor());
-            String[] names = { "Member", "Recruit", "Admin", "Owner" };
+            String[] names = getRanks();
 
             event.getPlayer().setPlayerListName("§6["+color+faction.getName()+"§6]["+color+names[faction.getRank(event.getPlayer().getUniqueId())]+"§6]["+color+event.getPlayer().getName()+"§6]");
             event.setJoinMessage(getChatColor(faction.getColor())+event.getPlayer().getName()+"§7 Has joined the server!");
@@ -99,7 +97,7 @@ public class MyEventHandler implements Listener {
         MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
         if(faction != null){
             String color = getChatColor(faction.getColor());
-            String[] names = { "Member", "Recruit", "Admin", "Owner" };
+            String[] names = getRanks();
 
             if(isChatting(event.getPlayer().getUniqueId())){
                 for(String uuid : faction.getPlayers()){
@@ -141,7 +139,7 @@ public class MyEventHandler implements Listener {
             Claim claim = getClaim(chunk);
 
             if(claim.getType() > 0){
-                if(!event.getPlayer().isOp()){
+                if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
                     event.setCancelled(true);
                     event.getPlayer().sendMessage("§cOnly server admins can place blocks in zones.");
                 }
@@ -173,7 +171,7 @@ public class MyEventHandler implements Listener {
             Claim claim = getClaim(chunk);
 
             if(claim.getType() > 0){
-                if(!event.getPlayer().isOp()){
+                if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
                     event.setCancelled(true);
                     event.getPlayer().sendMessage("§cOnly server admins can break blocks in zones.");
                 }
@@ -207,13 +205,13 @@ public class MyEventHandler implements Listener {
                 Claim claim = getClaim(chunk);
                 if(claim.getType() > 0){
                     if(getSafeNoEdit().contains(block.getType())){
-                        if(!event.getPlayer().isOp()){
+                        if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
                             event.setCancelled(true);
                             event.getPlayer().sendMessage("§cOnly server admins can interact with blocks in zones.");
                         }
                     }
 
-                }else if(getNoEdit().contains(block.getType())){
+                }else if(!isEnenmyChests() && getNoEdit().contains(block.getType())){
                     MyFaction faction = getPlayersFaction(event.getPlayer().getUniqueId());
                     if(faction != null){
                         if(!faction.getKey().equals(claim.getKey())){

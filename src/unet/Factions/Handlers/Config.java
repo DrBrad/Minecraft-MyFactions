@@ -22,6 +22,8 @@ public class Config {
     private static HashMap<Player, Player> playerTeleport = new HashMap<>();
     public static HashMap<Player, Long> wildDelayed = new HashMap<>();
 
+    private static String[] ranks = { "Member", "Recruit", "Admin", "Owner" };
+
     private static int teleportDelay = 2,
             wildRadius = 5000,
             wildDelay = 600,
@@ -38,7 +40,8 @@ public class Config {
             backTeleport = true,
             homeTeleport = true,
             factionHome = true,
-            factionWarp = true;
+            factionWarp = true,
+            enenmyChests = false;
 
     public Config(){
         if(!plugin.getDataFolder().exists()){
@@ -67,6 +70,8 @@ public class Config {
                 periodicTime = config.getInt("faction.periodic-increase-time");
                 factionHome = config.getBoolean("faction.home");
                 factionWarp = config.getBoolean("faction.warp");
+                enenmyChests = config.getBoolean("faction.enemy-open-chests");
+                ranks = config.getStringList("faction.ranks").toArray(new String[0]);
 
                 if(config.contains("spawn")){
                     spawn = new Location(Bukkit.getWorld(config.getString("spawn.world")),
@@ -105,6 +110,8 @@ public class Config {
                 config.set("faction.periodic-increase-time", 1800);
                 config.set("faction.home", true);
                 config.set("faction.warp", true);
+                config.set("faction.enemy-open-chests", false);
+                config.set("faction.ranks", new String[]{ "Member", "Recruit", "Admin", "Owner" });
 
                 config.save(configFile);
             }
@@ -190,6 +197,14 @@ public class Config {
 
     public static boolean isFactionWarp(){
         return factionWarp;
+    }
+
+    public static String[] getRanks(){
+        return ranks;
+    }
+
+    public static boolean isEnenmyChests(){
+        return enenmyChests;
     }
 
     public static void setSpawn(Location location){
