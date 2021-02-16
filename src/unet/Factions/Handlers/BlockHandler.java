@@ -7,16 +7,6 @@ import java.util.List;
 
 public class BlockHandler {
 
-    public static List<Material> getAir(){
-        Material[] tmp = {
-                Material.AIR,
-                Material.CAVE_AIR,
-                Material.VOID_AIR
-        };
-
-        return Arrays.asList(tmp);
-    }
-
     public static List<Material> getNoEdit(){
         Material[] tmp = {
                 Material.CHEST,
@@ -178,6 +168,21 @@ public class BlockHandler {
         return Arrays.asList(tmp);
     }
 
+    public static List<Material> getDangerous(){
+        Material[] tmp = {
+                Material.LAVA,
+                Material.WATER,
+                Material.MAGMA_BLOCK,
+                Material.CACTUS,
+                Material.FIRE,
+                Material.SOUL_FIRE,
+                Material.CAMPFIRE,
+                Material.SOUL_CAMPFIRE
+        };
+
+        return Arrays.asList(tmp);
+    }
+
     public static List<Material> getXRayBlocks(){
         Material[] tmp = {
                 Material.DIAMOND_BLOCK,
@@ -201,26 +206,57 @@ public class BlockHandler {
 
                 Material.SPAWNER,
                 Material.CHEST,
+                Material.TRAPPED_CHEST,
+                Material.BLACK_SHULKER_BOX,
+                Material.BLUE_SHULKER_BOX,
+                Material.BROWN_SHULKER_BOX,
+                Material.CYAN_SHULKER_BOX,
+                Material.GRAY_SHULKER_BOX,
+                Material.GREEN_SHULKER_BOX,
+                Material.LIGHT_BLUE_SHULKER_BOX,
+                Material.LIGHT_GRAY_SHULKER_BOX,
+                Material.LIME_SHULKER_BOX,
+                Material.MAGENTA_SHULKER_BOX,
+                Material.ORANGE_SHULKER_BOX,
+                Material.PINK_SHULKER_BOX,
+                Material.PURPLE_SHULKER_BOX,
+                Material.RED_SHULKER_BOX,
+                Material.WHITE_SHULKER_BOX,
+                Material.YELLOW_SHULKER_BOX,
                 Material.SHULKER_BOX,
                 Material.FURNACE,
                 Material.HOPPER,
                 Material.CRAFTING_TABLE
-
         };
 
         return Arrays.asList(tmp);
     }
 
-    public static List<Material> getDangerous(){
+    public static List<Material> getAir(){
         Material[] tmp = {
-                Material.LAVA,
-                Material.WATER,
-                Material.MAGMA_BLOCK,
-                Material.CACTUS,
-                Material.FIRE,
-                Material.SOUL_FIRE,
-                Material.CAMPFIRE,
-                Material.SOUL_CAMPFIRE
+                Material.AIR,
+                Material.CAVE_AIR,
+                Material.VOID_AIR,
+                Material.CHEST,
+                Material.TRAPPED_CHEST,
+                Material.HOPPER,
+                Material.BLACK_SHULKER_BOX,
+                Material.BLUE_SHULKER_BOX,
+                Material.BROWN_SHULKER_BOX,
+                Material.CYAN_SHULKER_BOX,
+                Material.GRAY_SHULKER_BOX,
+                Material.GREEN_SHULKER_BOX,
+                Material.LIGHT_BLUE_SHULKER_BOX,
+                Material.LIGHT_GRAY_SHULKER_BOX,
+                Material.LIME_SHULKER_BOX,
+                Material.MAGENTA_SHULKER_BOX,
+                Material.ORANGE_SHULKER_BOX,
+                Material.PINK_SHULKER_BOX,
+                Material.PURPLE_SHULKER_BOX,
+                Material.RED_SHULKER_BOX,
+                Material.WHITE_SHULKER_BOX,
+                Material.YELLOW_SHULKER_BOX,
+                Material.SHULKER_BOX
         };
 
         return Arrays.asList(tmp);
