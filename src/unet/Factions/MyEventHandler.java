@@ -8,7 +8,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import unet.Factions.Claim.Claim;
 import unet.Factions.Faction.*;
 
@@ -497,6 +502,35 @@ public class MyEventHandler implements Listener {
         if(isXRay()){
             antiXRay(event.getPlayer(), event.getPlayer().getLocation().getChunk());
         }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event){
+        if(event.getView().getTopInventory().getType() == InventoryType.ENDER_CHEST){
+            if(event.getClickedInventory() == event.getView().getBottomInventory()){
+                List<Material> shulkers = getShulkers();
+                int count = 0;
+                for(ItemStack item : event.getView().getTopInventory().getContents()){
+                    if(item != null && shulkers.contains(item.getType())){
+                        count++;
+                    }
+                }
+
+                if(count > getMaxShulkers()){
+                    event.setCancelled(true);
+                    event.getWhoClicked().sendMessage("§cThe server has limited the amount of shulkers per enderchest.");
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryMove(InventoryMoveItemEvent event){
+
+    }
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event){
     }
 
     public void antiXRay(Player player, Chunk centerChunk){

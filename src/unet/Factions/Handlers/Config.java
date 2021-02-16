@@ -36,7 +36,8 @@ public class Config {
             periodicDecrease = 1,
             periodicDecreaseCooldown = 86400,
             periodicTime = 1800,
-            XRayRadius = 2;
+            XRayRadius = 2,
+            maxShulkers = 2;
 
     private static boolean wildTeleport = true,
             backTeleport = true,
@@ -83,6 +84,8 @@ public class Config {
 
                 waterLogging = config.getBoolean("anti-water-logging.enabled");
 
+                maxShulkers = config.getInt("ender-chest.max-shulkers");
+
                 if(config.contains("spawn")){
                     spawn = new Location(Bukkit.getWorld(config.getString("spawn.world")),
                             config.getDouble("spawn.x"),
@@ -128,6 +131,8 @@ public class Config {
                 config.set("anti-xray.radius", 2);
 
                 config.set("anti-water-logging.enabled", true);
+
+                config.set("ender-chest.max-shulkers", 2);
 
                 config.save(configFile);
             }
@@ -237,6 +242,10 @@ public class Config {
 
     public static boolean isWaterLogging(){
         return waterLogging;
+    }
+
+    public static int getMaxShulkers(){
+        return maxShulkers;
     }
 
     public static void setSpawn(Location location){
