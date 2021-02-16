@@ -509,16 +509,18 @@ public class MyEventHandler implements Listener {
         if(event.getView().getTopInventory().getType() == InventoryType.ENDER_CHEST){
             if(event.getClickedInventory() == event.getView().getBottomInventory()){
                 List<Material> shulkers = getShulkers();
-                int count = 0;
-                for(ItemStack item : event.getView().getTopInventory().getContents()){
-                    if(item != null && shulkers.contains(item.getType())){
-                        count++;
+                if(shulkers.contains(event.getCurrentItem().getType())){
+                    int count = 0;
+                    for(ItemStack item : event.getView().getTopInventory().getContents()){
+                        if(item != null && shulkers.contains(item.getType())){
+                            count++;
+                        }
                     }
-                }
 
-                if(count > getMaxShulkers()){
-                    event.setCancelled(true);
-                    event.getWhoClicked().sendMessage("§cThe server has limited the amount of shulkers per enderchest.");
+                    if(count >= getMaxShulkers()){
+                        event.setCancelled(true);
+                        event.getWhoClicked().sendMessage("§cThe server has limited the amount of shulkers per enderchest.");
+                    }
                 }
             }
         }
