@@ -7,6 +7,16 @@ import java.util.List;
 
 public class BlockHandler {
 
+    public static List<Material> getAir(){
+        Material[] tmp = {
+                Material.AIR,
+                Material.CAVE_AIR,
+                Material.VOID_AIR
+        };
+
+        return Arrays.asList(tmp);
+    }
+
     public static List<Material> getNoEdit(){
         Material[] tmp = {
                 Material.CHEST,
@@ -95,6 +105,7 @@ public class BlockHandler {
                 Material.SPRUCE_BUTTON,
                 Material.STONE_BUTTON,
                 Material.WARPED_BUTTON,
+                Material.LEVER,
                 Material.REPEATER,
                 Material.COMPARATOR,
                 Material.COMMAND_BLOCK,
@@ -162,6 +173,39 @@ public class BlockHandler {
                 Material.COMMAND_BLOCK_MINECART,
                 Material.CHAIN_COMMAND_BLOCK,
                 Material.REPEATING_COMMAND_BLOCK
+        };
+
+        return Arrays.asList(tmp);
+    }
+
+    public static List<Material> getXRayBlocks(){
+        Material[] tmp = {
+                Material.DIAMOND_BLOCK,
+                Material.IRON_BLOCK,
+                Material.GOLD_BLOCK,
+                Material.EMERALD_BLOCK,
+                Material.NETHERITE_BLOCK,
+                Material.LAPIS_BLOCK,
+                Material.REDSTONE_BLOCK,
+                Material.COAL_BLOCK,
+
+                Material.DIAMOND_ORE,
+                Material.IRON_ORE,
+                Material.GOLD_ORE,
+                Material.NETHER_GOLD_ORE,
+                Material.EMERALD_ORE,
+                Material.ANCIENT_DEBRIS,
+                Material.LAPIS_ORE,
+                Material.REDSTONE_ORE,
+                Material.COAL_ORE,
+
+                Material.SPAWNER,
+                Material.CHEST,
+                Material.SHULKER_BOX,
+                Material.FURNACE,
+                Material.HOPPER,
+                Material.CRAFTING_TABLE
+
         };
 
         return Arrays.asList(tmp);

@@ -34,14 +34,18 @@ public class Config {
             joinPower = 20,
             periodicIncrease = 3,
             periodicDecrease = 1,
-            periodicTime = 1800;
+            periodicDecreaseCooldown = 86400,
+            periodicTime = 1800,
+            XRayRadius = 2;
 
     private static boolean wildTeleport = true,
             backTeleport = true,
             homeTeleport = true,
             factionHome = true,
             factionWarp = true,
-            enenmyChests = false;
+            enenmyChests = false,
+            XRay = false,
+            waterLogging = true;
 
     public Config(){
         if(!plugin.getDataFolder().exists()){
@@ -68,10 +72,16 @@ public class Config {
                 periodicIncrease = config.getInt("faction.periodic-power-increase");
                 periodicDecrease = config.getInt("faction.periodic-power-decrease");
                 periodicTime = config.getInt("faction.periodic-increase-time");
+                periodicDecreaseCooldown = config.getInt("faction.periodic-power-decrease-cooldown");
                 factionHome = config.getBoolean("faction.home");
                 factionWarp = config.getBoolean("faction.warp");
                 enenmyChests = config.getBoolean("faction.enemy-open-chests");
                 ranks = config.getStringList("faction.ranks").toArray(new String[0]);
+
+                XRay = config.getBoolean("anti-xray.enabled");
+                XRayRadius = config.getInt("anti-xray.radius");
+
+                waterLogging = config.getBoolean("anti-water-logging.enabled");
 
                 if(config.contains("spawn")){
                     spawn = new Location(Bukkit.getWorld(config.getString("spawn.world")),
@@ -108,10 +118,16 @@ public class Config {
                 config.set("faction.periodic-power-increase", 3);
                 config.set("faction.periodic-power-decrease", 1);
                 config.set("faction.periodic-increase-time", 1800);
+                config.set("faction.periodic-power-decrease-cooldown", 86400);
                 config.set("faction.home", true);
                 config.set("faction.warp", true);
                 config.set("faction.enemy-open-chests", false);
                 config.set("faction.ranks", new String[]{ "Member", "Recruit", "Admin", "Owner" });
+
+                config.set("anti-xray.enabled", false);
+                config.set("anti-xray.radius", 2);
+
+                config.set("anti-water-logging.enabled", true);
 
                 config.save(configFile);
             }
@@ -171,6 +187,10 @@ public class Config {
         return periodicDecrease;
     }
 
+    public static int getPeriodicDecreaseCooldown(){
+        return periodicDecreaseCooldown*1000;
+    }
+
     public static int getPeriodicTime(){
         return periodicTime*20;
     }
@@ -205,6 +225,18 @@ public class Config {
 
     public static boolean isEnenmyChests(){
         return enenmyChests;
+    }
+
+    public static boolean isXRay(){
+        return XRay;
+    }
+
+    public static int getXRayRadius(){
+        return XRayRadius;
+    }
+
+    public static boolean isWaterLogging(){
+        return waterLogging;
     }
 
     public static void setSpawn(Location location){

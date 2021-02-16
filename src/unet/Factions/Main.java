@@ -8,15 +8,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import unet.Factions.Claim.ClaimHandler;
 import unet.Factions.Faction.FactionHandler;
 import unet.Factions.Faction.MyFaction;
+import unet.Factions.Handlers.PlayerCooldown;
 import unet.Factions.Handlers.PlayerResolver;
 import unet.Factions.Handlers.Config;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.UUID;
 
 import static unet.Factions.Handlers.Config.*;
 import static unet.Factions.Handlers.MapHandler.*;
 import static unet.Factions.Faction.FactionHandler.*;
+import static unet.Factions.Handlers.PlayerCooldown.*;
 
 public class Main extends JavaPlugin {
 
@@ -50,10 +53,13 @@ public class Main extends JavaPlugin {
         new PlayerResolver();
         new FactionHandler();
         new ClaimHandler();
+        new PlayerCooldown();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable(){
             @Override
             public void run(){
+                long now = new Date().getTime();
+
                 ArrayList<MyFaction> factions = getListOfFactions();
                 if(factions != null){
                     for(MyFaction faction : factions){
@@ -65,7 +71,7 @@ public class Main extends JavaPlugin {
                                 if(player.isOnline()){
                                     power += getPeriodicIncrease();
 
-                                }else{
+                                }else if(getPeriodicDecreaseCooldown()+getPlayerCooldown(player.getUniqueId()) < now){
                                     power -= getPeriodicDecrease();
                                 }
                             }

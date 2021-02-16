@@ -716,7 +716,6 @@ public class FactionCommands implements CommandExecutor, TabExecutor {
                                     member.getPlayer().sendMessage("§a"+receiver.getName()+"§7 has been demoted to §a"+names[rank]+"§7.");
                                 }
                             }
-
                         }else{
                             player.sendMessage("§cYou must be at least a faction admin to demote players.");
                         }

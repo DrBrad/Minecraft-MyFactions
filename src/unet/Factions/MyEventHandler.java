@@ -12,7 +12,9 @@ import org.bukkit.event.player.*;
 import unet.Factions.Claim.Claim;
 import unet.Factions.Faction.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import static unet.Factions.Claim.ClaimHandler.*;
@@ -20,6 +22,7 @@ import static unet.Factions.Faction.FactionHandler.*;
 import static unet.Factions.Handlers.Config.*;
 import static unet.Factions.Handlers.GeneralHandler.*;
 import static unet.Factions.Handlers.MapHandler.*;
+import static unet.Factions.Handlers.PlayerCooldown.*;
 import static unet.Factions.Handlers.PlayerResolver.*;
 import static unet.Factions.Handlers.Colors.*;
 import static unet.Factions.Handlers.BlockHandler.*;
@@ -27,6 +30,7 @@ import static unet.Factions.Handlers.BlockHandler.*;
 public class MyEventHandler implements Listener {
 
     private static HashMap<Player, UUID> enteredClaim = new HashMap<>();
+    private HashMap<UUID, ArrayList<Location>> xray = new HashMap<>();
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event){
@@ -43,6 +47,12 @@ public class MyEventHandler implements Listener {
         }else{
             event.getPlayer().setPlayerListName("§c"+event.getPlayer().getName());
             event.setJoinMessage("§c"+event.getPlayer().getName()+"§7 Has joined the server!");
+        }
+
+        setPlayerCooldown(event.getPlayer().getUniqueId());
+
+        if(isXRay()){
+            antiXRay(event.getPlayer(), event.getPlayer().getLocation().getChunk());
         }
     }
 
@@ -65,6 +75,12 @@ public class MyEventHandler implements Listener {
 
         if(isMapping(event.getPlayer().getUniqueId())){
             stopMapping(event.getPlayer());
+        }
+
+        setPlayerCooldown(event.getPlayer().getUniqueId());
+
+        if(xray.containsKey(event.getPlayer().getUniqueId())){
+            xray.remove(event.getPlayer().getUniqueId());
         }
     }
 
@@ -125,11 +141,13 @@ public class MyEventHandler implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockPlace(BlockPlaceEvent event){
-        if(event.getBlock().getBlockData() instanceof Waterlogged){
-            if(((Waterlogged) event.getBlock().getBlockData()).isWaterlogged()){
-                event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
-                event.setCancelled(true);
-                return;
+        if(isWaterLogging()){
+            if(event.getBlock().getBlockData() instanceof Waterlogged){
+                if(((Waterlogged) event.getBlock().getBlockData()).isWaterlogged()){
+                    event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
+                    event.setCancelled(true);
+                    return;
+                }
             }
         }
 
@@ -139,7 +157,11 @@ public class MyEventHandler implements Listener {
             Claim claim = getClaim(chunk);
 
             if(claim.getType() > 0){
-                if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
+                if(event.getPlayer().isOp()){
+                    return;
+                }
+
+                if(!event.getPlayer().hasPermission("f.admin")){
                     event.setCancelled(true);
                     event.getPlayer().sendMessage("§cOnly server admins can place blocks in zones.");
                 }
@@ -171,7 +193,11 @@ public class MyEventHandler implements Listener {
             Claim claim = getClaim(chunk);
 
             if(claim.getType() > 0){
-                if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
+                if(event.getPlayer().isOp()){
+                    return;
+                }
+
+                if(!event.getPlayer().hasPermission("f.admin")){
                     event.setCancelled(true);
                     event.getPlayer().sendMessage("§cOnly server admins can break blocks in zones.");
                 }
@@ -205,7 +231,11 @@ public class MyEventHandler implements Listener {
                 Claim claim = getClaim(chunk);
                 if(claim.getType() > 0){
                     if(getSafeNoEdit().contains(block.getType())){
-                        if(!event.getPlayer().hasPermission("f.admin") || !event.getPlayer().isOp()){
+                        if(event.getPlayer().isOp()){
+                            return;
+                        }
+
+                        if(!event.getPlayer().hasPermission("f.admin")){
                             event.setCancelled(true);
                             event.getPlayer().sendMessage("§cOnly server admins can interact with blocks in zones.");
                         }
@@ -233,57 +263,63 @@ public class MyEventHandler implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBlockFromTo(BlockFromToEvent event){
-        if(event.getBlock().getType() == Material.WATER){
-            if(event.getToBlock().getBlockData() instanceof Waterlogged){
-                event.setCancelled(true);
+        if(isWaterLogging()){
+            if(event.getBlock().getType() == Material.WATER){
+                if(event.getToBlock().getBlockData() instanceof Waterlogged){
+                    event.setCancelled(true);
+                }
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onDispenseWaterLog(BlockDispenseEvent event){
-        Block block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()-1, event.getBlock().getY(), event.getBlock().getZ());
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
-        }
+        if(isWaterLogging()){
+            Block block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()-1, event.getBlock().getY(), event.getBlock().getZ());
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
 
-        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()+1, event.getBlock().getY(), event.getBlock().getZ());
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
-        }
+            block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX()+1, event.getBlock().getY(), event.getBlock().getZ());
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
 
-        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()-1);
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
-        }
+            block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()-1);
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
 
-        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()+1);
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
-        }
+            block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()+1);
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
 
-        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()-1, event.getBlock().getZ());
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
-        }
+            block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()-1, event.getBlock().getZ());
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
 
-        block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()+1, event.getBlock().getZ());
-        if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            return;
+            block = event.getBlock().getWorld().getBlockAt(event.getBlock().getX(), event.getBlock().getY()+1, event.getBlock().getZ());
+            if(event.getItem().getType() == Material.WATER_BUCKET && block.getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                return;
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBucketEmpty(PlayerBucketEmptyEvent event){
-        if(event.getBucket() == Material.WATER_BUCKET && event.getBlockClicked().getBlockData() instanceof Waterlogged){
-            event.setCancelled(true);
-            event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
+        if(isWaterLogging()){
+            if(event.getBucket() == Material.WATER_BUCKET && event.getBlockClicked().getBlockData() instanceof Waterlogged){
+                event.setCancelled(true);
+                event.getPlayer().sendMessage("§cWater Logging blocks is not allowed.");
+            }
         }
     }
 
@@ -449,5 +485,91 @@ public class MyEventHandler implements Listener {
             enteredClaim.put(event.getPlayer(), null);
             sendTitle(event.getPlayer(), "§2Wilderness", "", 0, 1, 0);
         }
+
+        if(isXRay()){
+            antiXRay(event.getPlayer(), event.getPlayer().getLocation().getChunk());
+        }
+    }
+
+    public void antiXRay(Player player, Chunk centerChunk){
+        if(xray.containsKey(player.getUniqueId())){
+            int size = xray.get(player.getUniqueId()).size();
+            if(size > 0){
+                for(int i = size; i > 0; i--){
+                    if(xray.get(player.getUniqueId()).size() > i){
+                        Location location = xray.get(player.getUniqueId()).get(i);
+                        if(location.getWorld() == centerChunk.getWorld()){
+                            if(player.getLocation().distance(location) > 100){
+                                xray.get(player.getUniqueId()).remove(i);
+                            }
+                        }else{
+                            xray.get(player.getUniqueId()).remove(i);
+                        }
+                    }
+                }
+            }
+        }else{
+            xray.put(player.getUniqueId(), new ArrayList<>());
+        }
+
+        ArrayList<Chunk> chunks = new ArrayList<>();
+
+        for(int x = -getXRayRadius(); x < getXRayRadius()+1; x++){
+            for(int z = -getXRayRadius(); z < getXRayRadius()+1; z++){
+                chunks.add(centerChunk.getBlock(0, 0, 0).getLocation().add(x*16, 0, z*16).getChunk());
+            }
+        }
+
+        List<Material> xrayBlocks = getXRayBlocks();
+
+        for(Chunk chunk : chunks){
+            if(!xray.get(player.getUniqueId()).contains(chunk.getBlock(0, 0, 0).getLocation())){
+                if(!xray.get(player.getUniqueId()).contains(chunk.getBlock(0, 0, 0).getLocation())){
+                    xray.get(player.getUniqueId()).add(chunk.getBlock(0, 0, 0).getLocation());
+                }
+
+                for(int x = 0; x < 16; x++){
+                    for(int z = 0; z < 16; z++){
+                        for(int y = 0; y < chunk.getWorld().getHighestBlockAt(
+                                (int)chunk.getBlock(x, 0, z).getLocation().getX(),
+                                (int)chunk.getBlock(x, 0, z).getLocation().getZ()).getY(); y++){
+                            Block block = chunk.getBlock(x, y, z);
+                            if(xrayBlocks.contains(block.getType())){
+                                if(!isOreExposed(block)){
+                                    player.sendBlockChange(block.getLocation(), Material.STONE.createBlockData());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isOreExposed(Block block){
+        List<Material> air = getAir();
+
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().add(1, 0, 0)).getType())){
+            return true;
+        }
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(1, 0, 0)).getType())){
+            return true;
+        }
+
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().add(0, 1, 0)).getType())){
+            return true;
+        }
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(0, 1, 0)).getType())){
+            return true;
+        }
+
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().add(0, 0, 1)).getType())){
+            return true;
+        }
+        if(air.contains(block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(0, 0, 1)).getType())){
+            return true;
+        }
+
+        return false;
     }
 }
