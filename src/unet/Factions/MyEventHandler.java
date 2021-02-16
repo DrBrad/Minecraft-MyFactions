@@ -219,6 +219,14 @@ public class MyEventHandler implements Listener {
                 }
             }
         }
+
+        if(isXRay()){
+            if(!event.isCancelled()){
+                if(xray.containsKey(event.getPlayer())){
+                    isNextToOre(event.getPlayer(), event.getBlock());
+                }
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -571,5 +579,36 @@ public class MyEventHandler implements Listener {
         }
 
         return false;
+    }
+
+    private void isNextToOre(Player player, Block block){
+        List<Material> ores = getXRayBlocks();
+
+        Block sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().add(1, 0, 0));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
+        sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(1, 0, 0));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
+
+        sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().add(0, 1, 0));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
+        sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(0, 1, 0));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
+
+        sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().add(0, 0, 1));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
+        sideBlock = block.getLocation().getWorld().getBlockAt(block.getLocation().subtract(0, 0, 1));
+        if(ores.contains(sideBlock.getType())){
+            player.sendBlockChange(sideBlock.getLocation(), sideBlock.getBlockData());
+        }
     }
 }
