@@ -155,7 +155,7 @@ public class MyFaction implements Faction {
 
     public boolean demote(UUID sender, UUID receiver){
         if(ranks.has(sender.toString()) && ranks.has(receiver.toString())){
-            if(ranks.getInt(sender.toString())-1 > ranks.getInt(receiver.toString()) && ranks.getInt(receiver.toString()) != 3 && ranks.getInt(receiver.toString()) > 0){
+            if(ranks.getInt(sender.toString()) > ranks.getInt(receiver.toString()) && ranks.getInt(receiver.toString()) != 3 && ranks.getInt(receiver.toString()) > 0){
                 ranks.put(receiver.toString(), ranks.getInt(receiver.toString())-1);
                 writeRanks();
                 return true;
