@@ -2,6 +2,7 @@ package unet.Factions.Handlers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -9,9 +10,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import static unet.Factions.Main.plugin;
 
@@ -48,6 +47,8 @@ public class Config {
             XRay = false,
             waterLogging = true;
 
+    private static ArrayList<Material> antiWaterLogWhiteList = new ArrayList<>();
+
     public Config(){
         if(!plugin.getDataFolder().exists()){
             plugin.getDataFolder().mkdirs();
@@ -83,6 +84,12 @@ public class Config {
                 XRayRadius = config.getInt("anti-xray.radius");
 
                 waterLogging = config.getBoolean("anti-water-logging.enabled");
+
+                List<String> waterLoggedWhiteList = config.getStringList("anti-water-logging.white-list-blocks");
+                for(String name : waterLoggedWhiteList){
+                    Bukkit.getLogger().info(name);
+                    antiWaterLogWhiteList.add(Material.valueOf(name));
+                }
 
                 maxShulkers = config.getInt("ender-chest.max-shulkers");
 
@@ -131,6 +138,8 @@ public class Config {
                 config.set("anti-xray.radius", 2);
 
                 config.set("anti-water-logging.enabled", true);
+                config.set("anti-water-logging.white-list-blocks", Arrays.asList(Material.CONDUIT.name()));
+                antiWaterLogWhiteList.add(Material.CONDUIT);
 
                 config.set("ender-chest.max-shulkers", 2);
 
@@ -242,6 +251,10 @@ public class Config {
 
     public static boolean isWaterLogging(){
         return waterLogging;
+    }
+
+    public static List<Material> getAntiWaterLogWhiteList(){
+        return antiWaterLogWhiteList;
     }
 
     public static int getMaxShulkers(){

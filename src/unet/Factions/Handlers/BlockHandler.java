@@ -104,7 +104,18 @@ public class BlockHandler {
                 Material.REPEATING_COMMAND_BLOCK,
                 Material.BREWING_STAND,
                 Material.CAULDRON,
-                Material.BEACON
+                Material.BEACON,
+                Material.CAMPFIRE,
+                Material.BLAST_FURNACE,
+                Material.FURNACE,
+                Material.ACACIA_FENCE_GATE,
+                Material.BIRCH_FENCE_GATE,
+                Material.CRIMSON_FENCE_GATE,
+                Material.DARK_OAK_FENCE_GATE,
+                Material.JUNGLE_FENCE_GATE,
+                Material.OAK_FENCE_GATE,
+                Material.SPRUCE_FENCE_GATE,
+                Material.WARPED_FENCE_GATE
         };
 
         return Arrays.asList(tmp);
@@ -159,11 +170,22 @@ public class BlockHandler {
                 Material.LAVA,
                 Material.REPEATER,
                 Material.COMPARATOR,
-                Material.COMMAND_BLOCK,
                 Material.COMMAND_BLOCK_MINECART,
                 Material.CHAIN_COMMAND_BLOCK,
                 Material.REPEATING_COMMAND_BLOCK,
-                Material.BEACON
+                Material.BEACON,
+                Material.CAMPFIRE,
+                Material.BLAST_FURNACE,
+                Material.FURNACE,
+                Material.ACACIA_FENCE_GATE,
+                Material.BIRCH_FENCE_GATE,
+                Material.BREWING_STAND,
+                Material.CRIMSON_FENCE_GATE,
+                Material.DARK_OAK_FENCE_GATE,
+                Material.JUNGLE_FENCE_GATE,
+                Material.OAK_FENCE_GATE,
+                Material.SPRUCE_FENCE_GATE,
+                Material.WARPED_FENCE_GATE
         };
 
         return Arrays.asList(tmp);
