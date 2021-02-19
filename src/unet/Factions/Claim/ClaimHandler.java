@@ -75,8 +75,8 @@ public class ClaimHandler {
                         if(claimedFaction.getType() == 0){
                             if(!claimedFaction.getKey().equals(faction.getKey())){
                                 if(((MyFaction) claimedFaction).getPower() < 0){
-                                    claim.setKey(faction.getKey());
-                                    claim.setType(faction.getType());
+                                    claims.getJSONObject(key).put("k", faction.getKey().toString());
+                                    claims.getJSONObject(key).put("t", faction.getType());
                                     faction.setPower(faction.getPower()-getClaimCost());
                                     ((MyFaction) claimedFaction).setPower(((MyFaction) claimedFaction).getPower()+getClaimCost());
                                     write();
@@ -93,8 +93,8 @@ public class ClaimHandler {
                             player.sendMessage("§cThis chunk is claimed by a zone, you cannot over claim this chunk.");
                         }
                     }else{
-                        claim.setKey(faction.getKey());
-                        claim.setType(faction.getType());
+                        claims.getJSONObject(key).put("k", faction.getKey().toString());
+                        claims.getJSONObject(key).put("t", faction.getType());
                         faction.setPower(faction.getPower()-getClaimCost());
                         write();
                         player.sendMessage("§7You have §aclaimed§7 this chunk for "+faction.getName()+".");
@@ -132,8 +132,8 @@ public class ClaimHandler {
                     }
                 }
 
-                claim.setKey(zone.getKey());
-                claim.setType(zone.getType());
+                claims.getJSONObject(key).put("k", zone.getKey().toString());
+                claims.getJSONObject(key).put("t", zone.getType());
                 write();
                 player.sendMessage("§7You have §aclaimed§7 this chunk for "+zone.getName()+".");
                 return true;
